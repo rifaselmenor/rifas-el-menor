@@ -30,6 +30,18 @@ document.addEventListener('DOMContentLoaded', async () => {
   showToast('⏳ Cargando rifas...', 1800);
   await loadTicketStates();
   buildAvailableList();
+
+  // ─── BLOQUEO ANTI-TRAMPAS (PAUSA) ───
+  const { data: configData } = await db.from('landing_config').select('ventas_activas').eq('id', 'main').single();
+  if (configData && configData.ventas_activas === false) {
+    document.getElementById('ticketGrid').innerHTML = '<div style="grid-column: 1/-1; text-align:center; padding:40px; background:rgba(239,68,68,0.15); border: 2px dashed #ef4444; border-radius:12px; margin:20px;"><h2 style="color:#ef4444; font-size:24px; margin-bottom:10px;">🛑 VENTAS PAUSADAS 🛑</h2><p style="color:#fca5a5;">Estamos esperando los resultados de la lotería. Nadie puede comprar en este momento. ¡Atentos al grupo VIP!</p></div>';
+    document.getElementById('btnPagar').style.display = 'none';
+    const floatingBar = document.getElementById('floatingBar');
+    if (floatingBar) floatingBar.style.display = 'none';
+    return; // Detiene todo para que no puedan elegir números
+  }
+  // ────────────────────────────────────
+
   renderPage();
   updateStats();
   updateSalesBar();
@@ -468,69 +480,4 @@ async function buscarMisBoletos() {
         ${data.length} PEDIDO${data.length>1?'S':''} ENCONTRADO${data.length>1?'S':''}:
        </div>` +
       data.map(p => {
-        const b = badges[p.estado] || badges.pendiente;
-        const nums = (p.numeros||[]).map(n => `<span class="vr-num">${String(n).padStart(4,'0')}</span>`).join('');
-        const fecha = new Date(p.created_at).toLocaleString('es-VE',{day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit'});
-        return `
-        <div class="vr-card" style="background:${b.bg};border-color:${b.border}">
-          <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:10px;gap:8px;">
-            <div>
-              <div style="font-weight:800;font-size:15px">${p.nombre}</div>
-              <div style="font-size:11px;color:#9B8EC4;margin-top:2px">${fecha}</div>
-            </div>
-            <span style="background:rgba(0,0,0,.3);border-radius:8px;padding:4px 10px;
-              font-size:11px;font-weight:800;color:${b.color};white-space:nowrap;flex-shrink:0">
-              ${b.icon} ${b.label}</span>
-          </div>
-          <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;font-size:13px;margin-bottom:10px;">
-            <div><span style="color:#9B8EC4;font-size:11px;display:block">Cédula</span><b>${p.cedula}</b></div>
-            <div><span style="color:#9B8EC4;font-size:11px;display:block">Boletos</span><b>${(p.numeros||[]).length}</b></div>
-            <div style="grid-column:span 2"><span style="color:#9B8EC4;font-size:11px;display:block">Total pagado</span>
-              <b style="color:#5EEAD4;font-size:16px">Bs. ${p.total}</b></div>
-          </div>
-          <div><div style="font-size:11px;font-weight:800;color:#9B8EC4;margin-bottom:4px">TUS NÚMEROS:</div><div>${nums}</div></div>
-        </div>`;
-      }).join('');
-  } catch(err) {
-    console.error(err);
-    resultsDiv.innerHTML = `
-      <div style="background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.3);
-        border-radius:14px;padding:16px;text-align:center;color:#FCA5A5;font-weight:700">
-        ❌ Error al consultar. Revisa tu conexión.
-      </div>`;
-  } finally {
-    btn.textContent = 'Buscar'; btn.disabled = false;
-  }
-}
-
-// ─────────────────────────────────────────
-// TOAST
-// ─────────────────────────────────────────
-function showToast(msg, duration = 2000) {
-  const old = document.querySelector('.toast'); if (old) old.remove();
-  const t = document.createElement('div');
-  t.className = 'toast'; t.textContent = msg;
-  document.body.appendChild(t);
-  setTimeout(() => t.remove(), duration);
-}
-
-// ─────────────────────────────────────────
-// NOTIFICACIONES TELEGRAM
-// ─────────────────────────────────────────
-async function notificarTelegram(nombre, boletos, total, ref) {
-  const BOT_TOKEN = '8666595624:AAGoWxS-9QGxtB1p4opumRqWoyB4n-Su4tI'; 
-  const CHAT_ID = '5873749605'; 
-  
-  const mensaje = `🚨 ¡NUEVA RESERVA! 🚨\n\n👤 Cliente: ${nombre}\n🎟️ Boletos: ${boletos}\n💰 Pago: Bs. ${total}\n🧾 Referencia: ${ref}\n\nRevisa el panel de Admin. 🏃‍♂️💨`;
-
-  const url = `https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`;
-  try {
-    await fetch(url, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ chat_id: CHAT_ID, text: mensaje })
-    });
-  } catch (error) {
-    console.log('Error enviando Telegram:', error);
-  }
-}
+        const b = ba
