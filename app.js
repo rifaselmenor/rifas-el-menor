@@ -342,6 +342,10 @@ async function submitOrder(e) {
     numerosArr.forEach(n => ticketStates.set(n, 'reservado'));
     buildAvailableList();
     closePayModal();
+    
+    // ★ AQUÍ SE ACTIVA TU BOT DE TELEGRAM AUTOMÁTICAMENTE ★
+    notificarTelegram(nombre, numerosArr.length, total, ref);
+
     showSuccessModal({ nombre, cedula, whatsapp, ref, numeros:numerosArr, total });
     clearSelection(false);
     renderPage(); updateStats(); updateSalesBar();
@@ -508,4 +512,25 @@ function showToast(msg, duration = 2000) {
   t.className = 'toast'; t.textContent = msg;
   document.body.appendChild(t);
   setTimeout(() => t.remove(), duration);
+}
+
+// ─────────────────────────────────────────
+// NOTIFICACIONES TELEGRAM
+// ─────────────────────────────────────────
+async function notificarTelegram(nombre, boletos, total, ref) {
+  const BOT_TOKEN = '8666595624:AAGoWxS-9QGxtB1p4opumRqWoyB4n-Su4tI'; 
+  const CHAT_ID = '5873749605'; 
+  
+  const mensaje = `🚨 ¡NUEVA RESERVA! 🚨\n\n👤 Cliente: ${nombre}\n🎟️ Boletos: ${boletos}\n💰 Pago: Bs. ${total}\n🧾 Referencia: ${ref}\n\nRevisa el panel de Admin. 🏃‍♂️💨`;
+
+  const url = `https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`;
+  try {
+    await fetch(url, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ chat_id: CHAT_ID, text: mensaje })
+    });
+  } catch (error) {
+    console.log('Error enviando Telegram:', error);
+  }
 }
