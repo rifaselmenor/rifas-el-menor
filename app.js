@@ -51,18 +51,39 @@ document.addEventListener('DOMContentLoaded', async () => {
 });
 
 // ─────────────────────────────────────────
-// CARGAR ESTADOS DESDE SUPABASE
+// CARGAR ESTADOS DESDE SUPABASE (SIN LÍMITES)
 // ─────────────────────────────────────────
 async function loadTicketStates() {
   try {
-    const { data, error } = await db
-      .from('tickets').select('numero,estado')
-      .in('estado', ['vendido','reservado']);
-    if (error) throw error;
-    if (data) data.forEach(t => ticketStates.set(parseInt(t.numero), t.estado));
+    ticketStates.clear();
+    let desde = 0;
+    let hasta = 999;
+    let hayMasData = true;
+
+    while (hayMasData) {
+      const { data, error } = await db
+        .from('tickets')
+        .select('numero,estado')
+        .in('estado', ['vendido', 'reservado'])
+        .range(desde, hasta);
+
+      if (error) throw error;
+
+      if (data && data.length > 0) {
+        data.forEach(t => ticketStates.set(parseInt(t.numero), t.estado));
+        if (data.length < 1000) {
+          hayMasData = false;
+        } else {
+          desde += 1000;
+          hasta += 1000;
+        }
+      } else {
+        hayMasData = false;
+      }
+    }
   } catch(e) {
     console.error('loadTicketStates:', e);
-    showToast('⚠️ Sin conexión. Modo demo.', 2000);
+    showToast('⚠️ Error al sincronizar números', 2000);
   }
 }
 
