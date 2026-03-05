@@ -4,7 +4,7 @@
 // ╚══════════════════════════════════════════════════════════════╝
 
 const PRECIO_BOLETO      = 5;      // ◄ Precio en Bs. por boleto
-const MINIMO_BOLETOS     = 20;     // ◄ Mínimo de boletos a comprar
+let MINIMO_BOLETOS       = 20;     // ◄ Mínimo de boletos a comprar (Ahora con let)
 const TOTAL_BOLETOS      = 10000;  // 0000-9999 — no tocar
 const BOLETOS_POR_PAGINA = 500;    // boletos por página — no tocar
 const VIP_URL = 'https://chat.whatsapp.com/ChkSensk7jPHY5qS8e2VRM?mode=gi_t';
@@ -164,6 +164,28 @@ function toggleTicket(num) {
   const btn = document.querySelector(`.ticket[data-num="${num}"]`);
   if (btn) applyTicketStyle(btn, num);
   updateFloatingBar();
+}
+
+// ─────────────────────────────────────────
+// NUEVA FUNCIÓN: AJUSTAR BOLETOS (+10 / -10)
+// ─────────────────────────────────────────
+function ajustarBoletos(cambio) {
+    let nuevaCantidad = MINIMO_BOLETOS + cambio;
+    if (nuevaCantidad < 20) nuevaCantidad = 20; 
+    MINIMO_BOLETOS = nuevaCantidad;
+    
+    const statMin = document.getElementById('statMin');
+    if (statMin) statMin.textContent = MINIMO_BOLETOS;
+    
+    const minLabel = document.getElementById('minLabel');
+    if (minLabel) minLabel.textContent = MINIMO_BOLETOS;
+    
+    const btnRandom = document.getElementById('btnRandom');
+    if (btnRandom) btnRandom.innerHTML = `🎲 ${MINIMO_BOLETOS} al Azar`;
+
+    clearSelection(false);
+    updateFloatingBar();
+    randomSelect();
 }
 
 // ─────────────────────────────────────────

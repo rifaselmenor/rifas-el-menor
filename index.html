@@ -269,16 +269,13 @@
 <body>
 <div class="content">
 
-  <!-- ═══════ HEADER ═══════ -->
   <header class="header-glow sticky top-0 z-50">
     <div class="px-4 py-3">
       <div class="flex items-start justify-between gap-2">
         <div class="min-w-0">
-          <!-- ★ Nombre con efecto metálico Azul-Morado-Verde Agua -->
           <div class="logo-text">🎟️ Rifas El Menor</div>
           <div class="slogan-neon mt-0.5">✨ Sal de la deuda de CASHEA este 2026</div>
         </div>
-        <!-- ★ Barra de porcentaje de ventas — reemplaza "GRAN PREMIO" -->
         <div class="sales-card">
           <div class="flex justify-between items-center">
             <span class="text-xs text-gray-400 font-bold">Vendidos</span>
@@ -294,7 +291,6 @@
         </div>
       </div>
 
-      <!-- Stats sin cambios -->
       <div class="grid grid-cols-3 gap-2 mt-3">
         <div class="stat-card p-2 text-center">
           <div class="text-xs text-gray-400">Precio</div>
@@ -312,7 +308,6 @@
     </div>
   </header>
 
-  <!-- ═══════ MAIN ═══════ -->
   <main class="px-3 pt-4 pb-36">
 
     <button onclick="openVerifyModal()" class="btn-verify py-3 text-sm mb-4">
@@ -324,9 +319,12 @@
       <input type="text" id="searchInput"
         class="search-input flex-1 px-3 py-2.5 text-sm"
         placeholder="🔍 Buscar número..." maxlength="4" inputmode="numeric" />
-      <button onclick="randomSelect()" class="btn-teal px-4 py-2.5 text-sm whitespace-nowrap">
-        🎲 20 al Azar
-      </button>
+        
+      <div class="flex items-center gap-1">
+        <button onclick="ajustarBoletos(-10)" class="btn-outline px-3 py-2.5 text-sm font-black" style="color: #ef4444; border-color: rgba(239,68,68,0.3); background: rgba(239,68,68,0.05);">-10</button>
+        <button id="btnRandom" onclick="randomSelect()" class="btn-teal px-4 py-2.5 text-sm whitespace-nowrap font-black">🎲 20 al Azar</button>
+        <button onclick="ajustarBoletos(10)" class="btn-outline px-3 py-2.5 text-sm font-black" style="color: #10b981; border-color: rgba(16,185,129,0.3); background: rgba(16,185,129,0.05);">+10</button>
+      </div>
     </div>
 
     <div class="flex gap-4 mb-3 flex-wrap">
@@ -362,7 +360,6 @@
 
   </main>
 
-  <!-- ═══════ BARRA FLOTANTE ═══════ -->
   <div class="floating-bar px-4 py-3">
     <div class="flex items-center gap-3 mb-2">
       <div class="flex-1">
@@ -389,19 +386,13 @@
     </div>
   </div>
 
-</div><!-- /content -->
-
-<!-- WA Soporte -->
-<a href="https://wa.me/584123400994" target="_blank" class="wa-support" title="Soporte">
+</div><a href="https://wa.me/584123400994" target="_blank" class="wa-support" title="Soporte">
   <svg viewBox="0 0 24 24" width="28" height="28" fill="#fff">
     <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/>
   </svg>
 </a>
 
 
-<!-- ═══════════════════════════════════════════════════════
-     MODAL TÉRMINOS Y CONDICIONES — se abre automáticamente
-═══════════════════════════════════════════════════════ -->
 <div id="termsModal" class="modal-center" style="display:none">
   <div class="modal-card p-5">
     <div class="text-center mb-4">
@@ -445,6 +436,7 @@
           <div class="text-xs text-gray-400 mt-1">El ganador dispone de un lapso máximo de 48 horas continuas para ponerse en contacto con la administración y reclamar su premio. De no hacerlo en este tiempo, el premio podrá ser declarado desierto o reprogramado.</div>
         </div>
       </div>
+
       <div class="terms-item">
         <span class="terms-icon">🚚</span>
         <div>
@@ -471,9 +463,6 @@
 </div>
 
 
-<!-- ═══════════════════════════════════════════════════════
-     MODAL VERIFICAR MIS BOLETOS
-═══════════════════════════════════════════════════════ -->
 <div id="verifyModal" class="modal-overlay" style="display:none">
   <div class="modal-sheet p-5">
     <div class="w-10 h-1 bg-white/20 rounded-full mx-auto mb-4"></div>
@@ -493,9 +482,6 @@
 </div>
 
 
-<!-- ═══════════════════════════════════════════════════════
-     MODAL PAGO — con 📋 copiar en Banco, C.I. y Teléfono
-═══════════════════════════════════════════════════════ -->
 <div id="payModal" class="modal-overlay" style="display:none">
   <div class="modal-sheet p-5">
     <div class="w-10 h-1 bg-white/20 rounded-full mx-auto mb-4"></div>
@@ -510,7 +496,6 @@
     <div class="payment-box p-4 mb-4">
       <div class="text-sm font-black text-teal-300 mb-2">💳 DATOS DE PAGO MÓVIL</div>
       <div class="space-y-2 text-sm">
-        <!-- Banco + copiar -->
         <div class="flex justify-between items-center">
           <span class="text-gray-400">Banco:</span>
           <span class="font-bold flex items-center gap-1">
@@ -518,7 +503,6 @@
             <button class="copy-btn" onclick="copyText('0102','Banco copiado ✅')" title="Copiar">📋</button>
           </span>
         </div>
-        <!-- C.I. + copiar -->
         <div class="flex justify-between items-center">
           <span class="text-gray-400">C.I:</span>
           <span class="font-bold flex items-center gap-1">
@@ -526,7 +510,6 @@
             <button class="copy-btn" onclick="copyText('30522091','Cédula copiada ✅')" title="Copiar">📋</button>
           </span>
         </div>
-        <!-- Teléfono + copiar -->
         <div class="flex justify-between items-center">
           <span class="text-gray-400">Teléfono:</span>
           <span class="font-bold flex items-center gap-1">
@@ -577,9 +560,6 @@
 </div>
 
 
-<!-- ═══════════════════════════════════════════════════════
-     MODAL ÉXITO + COUNTDOWN VIP
-═══════════════════════════════════════════════════════ -->
 <div id="successModal" class="modal-overlay" style="display:none">
   <div class="modal-sheet p-6 text-center">
     <div class="text-6xl mb-3">🎉</div>
