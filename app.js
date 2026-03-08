@@ -1,10 +1,9 @@
 // ╔══════════════════════════════════════════════════════════════╗
-// ║          RIFAS EL MENOR — app.js  v5                        ║
-// ║  Cambia SOLO las líneas marcadas con ◄                      ║
+// ║          RIFAS EL MENOR — app.js  v6 (Sénior Fix)           ║
 // ╚══════════════════════════════════════════════════════════════╝
 
-const PRECIO_BOLETO      = 5;      // ◄ Precio en Bs. por boleto
-const MINIMO_BOLETOS     = 20;     // ◄ Mínimo de boletos a comprar
+const PRECIO_BOLETO      = 5;      // Precio en Bs. por boleto
+const MINIMO_BOLETOS     = 20;     // Mínimo de boletos a comprar
 const TOTAL_BOLETOS      = 10000;  // 0000-9999 — no tocar
 const BOLETOS_POR_PAGINA = 500;    // boletos por página — no tocar
 const VIP_URL = 'https://chat.whatsapp.com/ChkSensk7jPHY5qS8e2VRM?mode=gi_t';
@@ -28,7 +27,6 @@ document.addEventListener('DOMContentLoaded', async () => {
   document.getElementById('statMin').textContent    = MINIMO_BOLETOS;
   document.getElementById('minLabel').textContent   = MINIMO_BOLETOS;
 
-  // Enlazamos la lógica a los botones "+ 10" y "- 10" sin tocar el HTML
   configurarBotonesDinamicos();
 
   showToast('⏳ Cargando boletos...');
@@ -41,18 +39,13 @@ document.addEventListener('DOMContentLoaded', async () => {
 // LÓGICA DE BOTONES DINÁMICOS (+10 / -10)
 // ─────────────────────────────────────────
 function configurarBotonesDinamicos() {
-  const botones = Array.from(document.querySelectorAll('button'));
-  const btnRestar = botones.find(b => b.textContent.includes('- 10'));
-  const btnSumar = botones.find(b => b.textContent.includes('+ 10'));
-  
-  // Buscar el texto central que muestra la cantidad (el que dice "20")
-  let displayDiv = null;
-  const textos = document.querySelectorAll('.font-black.text-lg.text-teal-400');
-  if (textos.length > 0) {
-    displayDiv = textos[0];
-  }
+  const btnRestar = document.getElementById('btnRestarAzar');
+  const btnSumar = document.getElementById('btnSumarAzar');
+  const displayDiv = document.getElementById('displayCantidadAzar');
 
   if (btnRestar && btnSumar && displayDiv) {
+    displayDiv.textContent = cantidadAzar;
+    
     btnRestar.onclick = () => {
       if (cantidadAzar > MINIMO_BOLETOS) {
         cantidadAzar -= 10;
@@ -132,13 +125,10 @@ function jumpToPage() {
 }
 
 // ─────────────────────────────────────────
-// SELECCIÓN AL AZAR EXACTA (PERFECCIONADA)
+// SELECCIÓN AL AZAR EXACTA 
 // ─────────────────────────────────────────
 function randomSelect() {
-  // 1. Limpiamos la selección anterior para que sea exacta a la cantidad pedida
   selectedTickets.clear();
-
-  // 2. Filtramos solo los boletos que están realmente disponibles
   let disp = availableList.filter(t => ticketStates.get(t) === 'available');
   
   if (disp.length < cantidadAzar) {
@@ -146,20 +136,17 @@ function randomSelect() {
     return;
   }
   
-  // 3. Mezclado matemático (Fisher-Yates) para 100% de aleatoriedad
   for (let i = disp.length - 1; i > 0; i--) {
     const j = Math.floor(Math.random() * (i + 1));
     [disp[i], disp[j]] = [disp[j], disp[i]];
   }
   
-  // 4. Agregamos exactamente la cantidad seleccionada en el contador
   for (let i = 0; i < cantidadAzar; i++) {
     selectedTickets.add(disp[i]);
   }
   
   showToast(`🎲 ¡${cantidadAzar} boletos seleccionados al azar!`);
   
-  // 5. Saltamos a la página donde quedó el primer boleto elegido
   let primerBoleto = Array.from(selectedTickets).sort()[0];
   if (primerBoleto) {
     let indice = parseInt(primerBoleto);
@@ -252,6 +239,9 @@ function previewCapture(input) {
   }
 }
 
+// ─────────────────────────────────────────
+// CONEXIÓN CON SUPABASE AL GUARDAR (ARREGLADO)
+// ─────────────────────────────────────────
 async function submitOrder(e) {
   e.preventDefault();
   
@@ -261,13 +251,63 @@ async function submitOrder(e) {
   
   const nombre = document.getElementById('fNombre').value;
   const cedula = document.getElementById('fCedula').value;
+  const whatsapp = document.getElementById('fWhatsapp').value;
   const totalPagado = selectedTickets.size * PRECIO_BOLETO;
   const referencia = document.getElementById('fRef').value;
-  const boletos = Array.from(selectedTickets).sort().join(', ');
+  const boletosArray = Array.from(selectedTickets).sort();
+  const boletosStr = boletosArray.join(', ');
+  const fileInput = document.getElementById('fCapture');
 
   try {
-    await notificarTelegram(nombre, boletos, totalPagado, referencia);
+    // 1. Subir Capture a Supabase Storage
+    let captureUrl = null;
+    if (fileInput.files.length > 0) {
+      const file = fileInput.files[0];
+      const ext = file.name.split('.').pop();
+      const fileName = `pagos/${Date.now()}_${cedula}.${ext}`;
+
+      const { error: uploadError } = await db.storage
+        .from('captures')
+        .upload(fileName, file, { cacheControl: '3600', upsert: false });
+
+      if (uploadError) throw uploadError;
+
+      const { data: publicUrlData } = db.storage.from('captures').getPublicUrl(fileName);
+      captureUrl = publicUrlData.publicUrl;
+    }
+
+    // 2. Guardar Pedido en tabla 'pedidos'
+    const { data: pedidoData, error: pedidoError } = await db
+      .from('pedidos')
+      .insert([{
+        nombre: nombre,
+        cedula: cedula,
+        whatsapp: whatsapp,
+        ref_comprobante: referencia,
+        numeros: boletosArray.map(Number),
+        total: totalPagado,
+        capture_url: captureUrl,
+        estado: 'pendiente'
+      }])
+      .select()
+      .single();
+
+    if (pedidoError) throw pedidoError;
+
+    // 3. Reservar Tickets en tabla 'tickets'
+    const ticketsToInsert = boletosArray.map(num => ({
+      numero: parseInt(num, 10),
+      estado: 'pendiente',
+      pedido_id: pedidoData.id
+    }));
+
+    const { error: ticketsError } = await db.from('tickets').insert(ticketsToInsert);
+    if (ticketsError) throw ticketsError;
+
+    // 4. Notificar a Telegram
+    await notificarTelegram(nombre, boletosStr, totalPagado, referencia);
     
+    // 5. Mostrar Éxito
     document.getElementById('payModal').style.display = 'none';
     document.getElementById('successSummary').innerHTML = `
       <div class="text-white">👤 ${nombre}</div>
@@ -279,7 +319,8 @@ async function submitOrder(e) {
     startVIPCountdown();
     
   } catch(error) {
-    showToast('❌ Error al enviar. Revisa tu conexión e intenta de nuevo.');
+    console.error(error);
+    showToast('❌ Error al enviar. Verifica tu conexión e intenta de nuevo.');
   } finally {
     btn.disabled = false;
     btn.innerHTML = '🚀 Confirmar y Reservar';
