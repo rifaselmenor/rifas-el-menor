@@ -531,30 +531,28 @@
   </div>
 </div>
 
-
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="config.js"></script>
 <script src="app.js"></script>
 
 <script>
   // =========================================================================
-  // TRUCO SENIOR: Controlamos el flujo de app.js sin editar su código.
+  // LÓGICA DEL BOTÓN COMPRAR TICKETS (CORREGIDO)
   // =========================================================================
-  
-  let isManualClick = false;
-  const originalOpenTerms = window.openTermsModal; 
-
-  // Silenciamos el popup automático de app.js. Solo obedece si damos click manual.
-  window.openTermsModal = function() {
-      if(isManualClick && originalOpenTerms) {
-          originalOpenTerms();
-      }
-  };
-
   function comenzarCompra() {
-      isManualClick = true;
-      window.openTermsModal();
-      isManualClick = false;
+      // Revisamos si el cliente ya aceptó los términos antes en esta sesión/navegador
+      const termsAgreed = localStorage.getItem('termsAgreed');
+      
+      if (!termsAgreed) {
+          // Si es nuevo, le mostramos el modal de Términos
+          document.getElementById('termsModal').style.display = 'flex';
+      } else {
+          // Si ya aceptó antes, revelamos la grilla de números y bajamos
+          document.getElementById('mainTicketSection').style.display = 'block';
+          document.getElementById('mainFloatingBar').style.display = 'block';
+          // Desplazamiento suave hasta los números
+          document.getElementById('mainTicketSection').scrollIntoView({ behavior: 'smooth' });
+      }
   }
 
   // =========================================================================
