@@ -2,204 +2,652 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-  <title>Admin Maestro — Rifas El Menor 🔰</title>
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Admin — Rifas El Menor</title>
   <script src="https://cdn.tailwindcss.com"></script>
-  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;900&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&family=Space+Grotesk:wght@400;500;700&display=swap" rel="stylesheet" />
   <style>
-    :root { --gold:#EAB308; --orange:#F97316; --bg:#0a0a0f; --surface:#111118; --surface2:#1a1a24; }
+    :root {
+      --purple:#7C3AED; --purple-light:#A78BFA; --purple-dark:#5B21B6;
+      --sky:#0EA5E9; --teal:#14B8A6;
+      --bg:#0F0A1E; --surface:#1A1035; --surface2:#231448;
+      --text:#F1F0FF; --text-muted:#9B8EC4;
+    }
     * { box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
-    body { font-family:'Nunito',sans-serif; background:var(--bg); color:#F1F0FF; margin:0; overflow-x:hidden; width:100%; }
-    
-    /* BLOQUEO DE ZOOM EN MÓVILES */
-    input, select, textarea { font-size: 16px !important; }
+    body { font-family:'Nunito',sans-serif; background:var(--bg); color:var(--text); min-height:100vh; }
+    body::before {
+      content:''; position:fixed; inset:0;
+      background:
+        radial-gradient(ellipse at 20%   0%, rgba(124,58,237,.2)  0%, transparent 60%),
+        radial-gradient(ellipse at 80% 100%, rgba(20,184,166,.15) 0%, transparent 60%);
+      pointer-events:none; z-index:0;
+    }
+    .content { position:relative; z-index:1; }
 
-    .btn-tab { padding: 12px 6px; font-size: 10px; font-weight: 900; border-radius: 10px; border: 1px solid rgba(255,255,255,0.05); background: rgba(255,255,255,0.02); color: #888; flex: 1; text-align: center; text-transform: uppercase; }
-    .btn-tab.active { background: var(--gold); color: #000; border-color: var(--gold); }
+    .card { background:rgba(255,255,255,.04); border:1px solid rgba(255,255,255,.08); border-radius:16px; }
+    .badge { padding:4px 10px; border-radius:8px; font-size:11px; font-weight:800; display:inline-block; }
+    .badge-pendiente { background:rgba(251,191,36,.2);  color:#FBB124; border:1px solid rgba(251,191,36,.4); }
+    .badge-aprobado  { background:rgba(20,184,166,.2);  color:#5EEAD4; border:1px solid rgba(20,184,166,.4); }
+    .badge-rechazado { background:rgba(239,68,68,.2);   color:#FCA5A5; border:1px solid rgba(239,68,68,.4);  }
 
-    .card { background:var(--surface2); border:1px solid rgba(255,255,255,0.08); border-radius:20px; border-left: 5px solid var(--gold); }
-    .wa-btn { background: #22C55E; color: #000; font-weight: 900; border-radius: 10px; padding: 10px; text-align: center; display: block; width: 100%; }
-    
-    .winner-search-area { background: linear-gradient(135deg, rgba(234,179,8,0.15), rgba(249,115,22,0.1)); border: 2px solid var(--gold); border-radius: 20px; }
-    .user-img { width: 100%; height: 160px; object-fit: cover; border-radius: 14px; border: 1px solid rgba(255,255,255,0.1); margin: 10px 0; }
-    
-    .toast { position:fixed; bottom:20px; left:50%; transform:translateX(-50%); background:#222; border:1px solid var(--gold); border-radius:10px; padding:10px 20px; z-index:9999; font-size: 12px; font-weight: 800; }
+    .btn-approve {
+      background:linear-gradient(135deg,#14B8A6,#0EA5E9);
+      color:#fff; font-weight:800; border:none; border-radius:10px;
+      cursor:pointer; font-family:'Nunito',sans-serif; transition:transform .15s;
+    }
+    .btn-approve:active { transform:scale(.96); }
+    .btn-reject {
+      background:linear-gradient(135deg,#EF4444,#DC2626);
+      color:#fff; font-weight:800; border:none; border-radius:10px;
+      cursor:pointer; font-family:'Nunito',sans-serif; transition:transform .15s;
+    }
+    .btn-reject:active { transform:scale(.96); }
+    .btn-reset {
+      background:linear-gradient(135deg,#7F1D1D,#DC2626); color:#fff; font-weight:900;
+      border:2px solid rgba(239,68,68,.5); border-radius:16px; cursor:pointer;
+      font-family:'Nunito',sans-serif; transition:transform .15s, box-shadow .15s;
+      box-shadow:0 4px 24px rgba(220,38,38,.4);
+    }
+    .btn-reset:active { transform:scale(.97); }
+
+    .btn-edit-landing {
+      background:linear-gradient(135deg,var(--purple),var(--sky));
+      color:#fff; font-weight:800; border:none; border-radius:12px;
+      cursor:pointer; font-family:'Nunito',sans-serif; transition:transform .15s;
+      box-shadow:0 4px 20px rgba(124,58,237,.4); font-size:13px;
+    }
+    .btn-edit-landing:active { transform:scale(.97); }
+
+    .landing-edit-panel {
+      background:linear-gradient(135deg,rgba(124,58,237,.1),rgba(14,165,233,.07));
+      border:1px solid rgba(124,58,237,.35); border-radius:18px; padding:16px;
+      margin:0 16px 16px;
+    }
+
+    .login-screen { min-height:100vh; display:flex; align-items:center; justify-content:center; padding:20px; }
+    .login-card {
+      background:var(--surface); border:1px solid rgba(124,58,237,.3);
+      border-radius:24px; padding:32px 24px; width:100%; max-width:360px;
+      box-shadow:0 20px 60px rgba(124,58,237,.2);
+    }
+    .form-input {
+      background:rgba(255,255,255,.06); border:1.5px solid rgba(255,255,255,.12);
+      border-radius:12px; color:#fff; outline:none; width:100%;
+      font-family:'Nunito',sans-serif; padding:12px 16px; transition:border-color .2s;
+    }
+    .form-input:focus { border-color:var(--purple-light); }
+    .form-input::placeholder { color:var(--text-muted); }
+    .form-textarea {
+      background:rgba(255,255,255,.06); border:1.5px solid rgba(255,255,255,.12);
+      border-radius:12px; color:#fff; outline:none; width:100%;
+      font-family:'Nunito',sans-serif; padding:12px 16px; transition:border-color .2s;
+      resize:vertical; min-height:80px;
+    }
+    .form-textarea:focus { border-color:var(--purple-light); }
+    .form-textarea::placeholder { color:var(--text-muted); }
+    .btn-primary {
+      background:linear-gradient(135deg,var(--purple),var(--sky));
+      color:#fff; font-weight:800; border:none; border-radius:14px;
+      cursor:pointer; width:100%; padding:14px; font-size:15px;
+      font-family:'Nunito',sans-serif; transition:transform .15s;
+    }
+    .btn-primary:active { transform:scale(.97); }
+
+    .num-chip {
+      background:rgba(124,58,237,.25); border:1px solid rgba(167,139,250,.3);
+      border-radius:6px; padding:2px 8px; font-size:11px; font-weight:700;
+      color:var(--purple-light); display:inline-block; margin:2px;
+    }
+    .capture-img {
+      width:100%; max-height:200px; object-fit:cover;
+      border-radius:10px; border:1px solid rgba(255,255,255,.1); cursor:pointer;
+    }
+    .tab-btn {
+      padding:8px 16px; border-radius:10px; font-weight:700; font-size:13px;
+      border:1.5px solid rgba(255,255,255,.12); background:transparent;
+      color:var(--text-muted); cursor:pointer; font-family:'Nunito',sans-serif;
+      transition:all .15s; white-space:nowrap;
+    }
+    .tab-btn.active { background:var(--purple); border-color:var(--purple-light); color:#fff; }
+
+    .winner-box {
+      background:linear-gradient(135deg,rgba(250,204,21,.12) 0%,rgba(234,179,8,.06) 100%);
+      border:1px solid rgba(250,204,21,.35); border-radius:18px;
+    }
+    .winner-result {
+      background:linear-gradient(135deg,rgba(20,184,166,.12) 0%,rgba(14,165,233,.08) 100%);
+      border:1px solid rgba(20,184,166,.4); border-radius:14px;
+    }
+    .btn-winner-search {
+      background:linear-gradient(135deg,#EAB308,#F59E0B);
+      color:#000; font-weight:900; border:none; border-radius:12px;
+      cursor:pointer; font-family:'Nunito',sans-serif; transition:transform .15s;
+      box-shadow:0 4px 20px rgba(234,179,8,.4);
+    }
+    .btn-winner-search:active { transform:scale(.97); }
+
+    .danger-zone { background:rgba(127,29,29,.15); border:1px solid rgba(239,68,68,.25); border-radius:18px; }
+
+    .copy-btn {
+      background:none; border:none; cursor:pointer; padding:1px 4px;
+      color:#5EEAD4; font-size:13px; opacity:.6;
+      transition:opacity .15s, transform .15s; vertical-align:middle; line-height:1;
+    }
+    .copy-btn:active { opacity:1; transform:scale(.82); }
+
+    .toast {
+      position:fixed; top:20px; left:50%; transform:translateX(-50%);
+      background:var(--surface2); border:1px solid rgba(255,255,255,.15);
+      border-radius:14px; padding:12px 20px; font-weight:700; font-size:14px;
+      z-index:9999; white-space:nowrap; animation:toastIn .3s ease;
+      box-shadow:0 8px 30px rgba(0,0,0,.5); max-width:90vw; text-align:center;
+    }
+    @keyframes toastIn {
+      from{ opacity:0; transform:translateX(-50%) translateY(-10px) }
+      to  { opacity:1; transform:translateX(-50%) translateY(0) }
+    }
+    ::-webkit-scrollbar{ width:4px }
+    ::-webkit-scrollbar-thumb{ background:rgba(124,58,237,.4); border-radius:4px }
   </style>
 </head>
-<body class="p-3">
+<body>
+<div class="content">
 
-<div id="loginSection" class="max-w-xs mx-auto mt-20 p-8 bg-surface border border-white/10 rounded-3xl">
-  <div class="text-center mb-8"><div class="text-5xl mb-2">🔰</div><h1 class="text-xl font-black uppercase">Acceso Admin</h1></div>
-  <input type="password" id="adminPass" class="w-full p-4 bg-white/5 border border-white/10 rounded-2xl text-center mb-4 text-white" placeholder="CONTRASEÑA" />
-  <button onclick="checkLogin()" class="w-full py-4 bg-gradient-to-r from-yellow-500 to-orange-600 text-black font-black rounded-2xl">ENTRAR</button>
-</div>
+  <div id="loginScreen" class="login-screen">
+    <div class="login-card">
+      <div class="text-center mb-6">
+        <div class="text-4xl mb-2">🔐</div>
+        <h1 class="text-xl font-black">Panel Admin</h1>
+        <p class="text-sm text-gray-400">Rifas El Menor</p>
+      </div>
+      <div class="space-y-3">
+        <input type="password" id="loginPass" class="form-input" placeholder="Contraseña" />
+        <button onclick="doLogin()" class="btn-primary">Ingresar →</button>
+      </div>
+      <p class="text-center text-xs text-gray-500 mt-4">
+        <a href="landing.html" class="text-purple-400">← Volver a la rifa</a>
+      </p>
+    </div>
+  </div>
 
-<div id="adminDashboard" class="hidden">
-  <header class="mb-6">
-    <div class="flex justify-between items-center mb-6">
-      <h1 class="text-2xl font-black text-white">Panel 🔰</h1>
-      <div class="flex gap-2">
-        <button onclick="abrirAjustes()" class="p-3 bg-white/5 rounded-xl border border-white/10">⚙️</button>
-        <button onclick="location.reload()" class="p-3 bg-white/5 rounded-xl border border-white/10">🔄</button>
+  <div id="adminPanel" style="display:none">
+
+    <div style="background:linear-gradient(135deg,#5B21B6,#1e0a4e);
+      border-bottom:1px solid rgba(124,58,237,.4);"
+      class="px-4 py-3 sticky top-0 z-50">
+      <div class="flex items-center justify-between">
+        <div>
+          <div style="font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:18px;">
+            ⚙️ Panel Admin
+          </div>
+          <div class="text-xs text-purple-300">Rifas El Menor</div>
+        </div>
+        <div class="flex items-center gap-2">
+          <button onclick="toggleLandingPanel()" class="btn-edit-landing px-3 py-2">
+            🖼️ Editar Página
+          </button>
+          <button onclick="doLogout()"
+            class="text-xs text-gray-400 border border-white/20 rounded-lg px-3 py-1.5">
+            Salir
+          </button>
+        </div>
+      </div>
+      <div class="grid grid-cols-3 gap-2 mt-3">
+        <div class="card p-2 text-center">
+          <div class="text-xs text-gray-400">Pendientes</div>
+          <div class="text-lg font-black text-yellow-400" id="sPendientes">0</div>
+        </div>
+        <div class="card p-2 text-center">
+          <div class="text-xs text-gray-400">Aprobados</div>
+          <div class="text-lg font-black text-teal-400" id="sAprobados">0</div>
+        </div>
+        <div class="card p-2 text-center">
+          <div class="text-xs text-gray-400">Rechazados</div>
+          <div class="text-lg font-black text-red-400" id="sRechazados">0</div>
+        </div>
       </div>
     </div>
 
-    <div class="winner-search-area p-5 mb-8">
-      <h2 class="text-[10px] font-black text-center text-yellow-400 tracking-[3px] mb-4">🏆 BUSCADOR DE GANADOR OFICIAL</h2>
-      <div class="flex gap-2">
-        <input type="number" id="inputWinner" class="flex-1 bg-black/60 border border-white/20 p-4 rounded-2xl text-center text-2xl font-black text-yellow-400" placeholder="0000" />
-        <button onclick="buscarGanador()" class="bg-gold px-5 text-black font-black rounded-2xl text-xs">BUSCAR</button>
+    <div style="text-align: center; margin: 16px; padding: 16px; background: rgba(239,68,68,0.05); border-radius: 12px; border: 1px solid rgba(239,68,68,0.3);">
+      <h3 style="color: #fca5a5; margin-bottom: 12px; font-weight: 800; font-size: 14px; text-transform: uppercase; letter-spacing: 1px;">⏱️ Botón de Pánico</h3>
+      <div style="display: flex; gap: 8px; justify-content: center;">
+        <button onclick="cambiarEstadoVentas(false)" style="flex: 1; background: #ef4444; color: white; padding: 10px; border: none; border-radius: 8px; font-weight: bold; font-size: 13px; box-shadow: 0 4px 15px rgba(239,68,68,0.3);">🔴 PAUSAR VENTAS</button>
+        <button onclick="cambiarEstadoVentas(true)" style="flex: 1; background: #10b981; color: white; padding: 10px; border: none; border-radius: 8px; font-weight: bold; font-size: 13px; box-shadow: 0 4px 15px rgba(16,185,129,0.3);">🟢 ABRIR VENTAS</button>
       </div>
-      <div id="winnerResult"></div>
     </div>
 
-    <div class="flex gap-1 mb-4">
-      <button onclick="setFilter('todos', this)" class="btn-tab active">Todos</button>
-      <button onclick="setFilter('aprobado', this)" class="btn-tab">Aprobados</button>
-      <button onclick="setFilter('pendiente', this)" class="btn-tab">Pendientes</button>
-      <button onclick="setFilter('rechazado', this)" class="btn-tab">Rechazados</button>
+    <div id="landingEditPanel" class="landing-edit-panel" style="display:none; margin-top:12px;">
+      <div class="flex items-center gap-2 mb-3">
+        <span class="text-2xl">🖼️</span>
+        <div>
+          <div class="font-black text-purple-300" style="font-family:'Space Grotesk',sans-serif;">
+            Editar Página Principal
+          </div>
+          <div class="text-xs text-gray-400">Flyer y mensaje inicial</div>
+        </div>
+      </div>
+      <div class="space-y-3">
+        <div>
+          <label class="text-xs font-bold text-gray-300 block mb-1">📷 Subir Flyer</label>
+          <label style="display:flex;flex-direction:column;align-items:center;gap:8px;padding:16px;
+            border:2px dashed rgba(167,139,250,.4);border-radius:12px;
+            background:rgba(124,58,237,.06);cursor:pointer;" for="flyerUpload">
+            <div class="text-3xl" id="flyerUploadIcon">📎</div>
+            <div class="text-sm text-gray-400 text-center" id="flyerUploadText">Toca para seleccionar</div>
+            <input type="file" id="flyerUpload" accept="image/*" class="hidden" onchange="previewFlyer(this)" />
+          </label>
+          <img id="flyerPreview" style="display:none;width:100%;margin-top:8px;border-radius:10px;max-height:160px;object-fit:cover;" />
+        </div>
+        <div>
+          <label class="text-xs font-bold text-gray-300 block mb-1">📝 Mensaje</label>
+          <textarea id="landingMsgInput" class="form-textarea" placeholder="Escribe tu mensaje aquí..."></textarea>
+        </div>
+        <div class="flex gap-2">
+          <button onclick="saveLandingContent()" style="flex:1;padding:12px;border:none;border-radius:12px;cursor:pointer;font-family:'Nunito',sans-serif;font-weight:900;font-size:14px;color:#fff;background:linear-gradient(135deg,#14B8A6,#0EA5E9);">💾 Guardar cambios</button>
+          <button onclick="toggleLandingPanel()" style="padding:12px 16px;border:1.5px solid rgba(255,255,255,.2);border-radius:12px;background:transparent;color:var(--text-muted);font-weight:700;cursor:pointer;font-family:'Nunito',sans-serif;">Cancelar</button>
+        </div>
+      </div>
     </div>
 
-    <input type="text" id="adminSearch" oninput="filterData()" class="w-full p-4 bg-white/5 border border-white/10 rounded-2xl text-sm" placeholder="🔍 Buscar nombre o cédula..." />
-  </header>
-
-  <div id="ordersList" class="pb-32"></div>
-</div>
-
-<div id="ajustesModal" class="fixed inset-0 bg-black/95 z-[2000] flex items-center justify-center p-6" style="display:none">
-  <div class="bg-surface border border-gold p-6 rounded-3xl w-full max-w-xs text-center">
-    <h2 class="text-lg font-black mb-6">⚙️ AJUSTES</h2>
-    <div class="space-y-3">
-      <button onclick="updateVentas(true)" class="w-full py-3 bg-green-500/20 text-green-400 border border-green-500/30 rounded-xl text-xs font-black uppercase">Abrir Ventas</button>
-      <button onclick="updateVentas(false)" class="w-full py-3 bg-red-500/20 text-red-400 border border-red-500/30 rounded-xl text-xs font-black uppercase">Pausar Ventas</button>
-      <div class="pt-4"><button onclick="resetearSistema()" class="w-full py-4 bg-red-600 text-white font-black rounded-xl text-xs uppercase">🗑️ Borrar Todo</button></div>
+    <div class="px-4 pt-4 pb-2">
+      <div class="winner-box p-4">
+        <div class="flex items-center gap-2 mb-3">
+          <span class="text-2xl">🏆</span>
+          <div>
+            <div style="font-family:'Space Grotesk',sans-serif;" class="font-bold text-yellow-300">Buscar Ganador</div>
+            <div class="text-xs text-gray-400">Ingresa el número de la lotería</div>
+          </div>
+        </div>
+        <div class="flex gap-2 mb-3">
+          <input type="text" id="winnerInput" class="form-input flex-1 text-center text-xl font-black" placeholder="0000" maxlength="4" inputmode="numeric" style="letter-spacing:.2em;" />
+          <button onclick="buscarGanador()" id="btnWinner" class="btn-winner-search px-5 py-2 text-sm">🔍 Buscar</button>
+        </div>
+        <div id="winnerResult"></div>
+      </div>
     </div>
-    <button onclick="cerrarAjustes()" class="mt-8 text-gray-500 font-bold text-xs">VOLVER</button>
+
+    <div class="px-4 py-3 flex gap-2 overflow-x-auto">
+      <button class="tab-btn active" onclick="filterPedidos('todos',this)">Todos</button>
+      <button class="tab-btn" onclick="filterPedidos('pendiente',this)">⏳ Pendientes</button>
+      <button class="tab-btn" onclick="filterPedidos('aprobado',this)">✅ Aprobados</button>
+      <button class="tab-btn" onclick="filterPedidos('rechazado',this)">❌ Rechazados</button>
+    </div>
+
+    <div class="px-4 mb-3">
+      <input type="text" id="adminSearch" class="form-input" placeholder="🔍 Buscar por nombre, cédula..." oninput="searchPedidos(this.value)" />
+    </div>
+
+    <div id="pedidosList" class="px-4 space-y-3">
+      <div class="text-center py-8 text-gray-500">⏳ Cargando pedidos...</div>
+    </div>
+
+    <div class="px-4 py-6">
+      <div class="danger-zone p-4">
+        <div class="text-xs font-black text-red-400 mb-1 tracking-widest">⚠️ ZONA DE PELIGRO</div>
+        <p class="text-xs text-gray-400 mb-4">Archiva la Rifa actual (guarda el top de compras y el ganador) y limpia la base de datos para una nueva jornada.</p>
+        <button onclick="reiniciarRifa()" class="btn-reset w-full py-4 text-base">🚨 Cerrar y Archivar Rifa</button>
+      </div>
+    </div>
+
   </div>
 </div>
 
+<div id="imgModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.92);z-index:9999;align-items:center;justify-content:center;" onclick="this.style.display='none'">
+  <img id="imgModalSrc" style="max-width:95%;max-height:90vh;border-radius:12px;" />
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="config.js"></script>
 <script>
-  let allData = [];
-  let currentFilter = 'todos';
+const ADMIN_PASSWORD = 'rifas2024';
 
-  function checkLogin() {
-    if (document.getElementById('adminPass').value === 'admin123') {
-      document.getElementById('loginSection').style.display = 'none';
-      document.getElementById('adminDashboard').classList.remove('hidden');
-      loadData();
-    } else { alert("Error de acceso"); }
+let allPedidos    = [];
+let currentFilter = 'todos';
+let flyerFile     = null;
+
+function doLogin() {
+  if (document.getElementById('loginPass').value === ADMIN_PASSWORD) {
+    document.getElementById('loginScreen').style.display = 'none';
+    document.getElementById('adminPanel').style.display  = 'block';
+    loadPedidos();
+    loadLandingConfig();
+  } else {
+    showToast('❌ Contraseña incorrecta');
   }
+}
+document.getElementById('loginPass').addEventListener('keypress', e => {
+  if (e.key === 'Enter') doLogin();
+});
+function doLogout() {
+  document.getElementById('adminPanel').style.display  = 'none';
+  document.getElementById('loginScreen').style.display = 'flex';
+  document.getElementById('loginPass').value = '';
+}
 
-  async function loadData() {
-    const { data, error } = await db.from('pedidos').select('*').order('created_at', { ascending: false });
-    if (!error) { allData = data; filterData(); }
+async function loadPedidos() {
+  try {
+    const { data, error } = await db.from('pedidos').select('*').order('created_at', { ascending:false });
+    if (error) throw error;
+    allPedidos = data || [];
+    updateStats();
+    renderPedidos(allPedidos);
+  } catch(err) {
+    console.error(err);
+    document.getElementById('pedidosList').innerHTML = '<div class="text-center py-8 text-red-400">❌ Error cargando pedidos</div>';
   }
+}
 
-  function setFilter(f, btn) {
-    currentFilter = f;
-    document.querySelectorAll('.btn-tab').forEach(b => b.classList.remove('active'));
-    btn.classList.add('active');
-    filterData();
+function updateStats() {
+  document.getElementById('sPendientes').textContent = allPedidos.filter(p => p.estado === 'pendiente').length;
+  document.getElementById('sAprobados').textContent  = allPedidos.filter(p => p.estado === 'aprobado').length;
+  document.getElementById('sRechazados').textContent = allPedidos.filter(p => p.estado === 'rechazado').length;
+}
+
+function renderPedidos(pedidos) {
+  const list = document.getElementById('pedidosList');
+  if (!pedidos.length) {
+    list.innerHTML = '<div class="text-center py-8 text-gray-500">No hay pedidos aquí</div>';
+    return;
   }
-
-  function filterData() {
-    const s = document.getElementById('adminSearch').value.toLowerCase();
-    let res = allData;
-    if (currentFilter !== 'todos') res = res.filter(o => o.estado === currentFilter);
-    if (s) res = res.filter(o => o.nombre.toLowerCase().includes(s) || o.cedula.toLowerCase().includes(s));
-    renderOrders(res);
-  }
-
-  function renderOrders(data) {
-    const container = document.getElementById('ordersList');
-    container.innerHTML = data.map(o => {
-      const waLink = `https://wa.me/${o.whatsapp.replace(/\D/g,'')}?text=${encodeURIComponent(`Hola ${o.nombre}, soy el administrador de la rifa.`)}`;
-      return `
-        <div class="card p-5 mb-4">
-          <div class="flex justify-between items-start mb-2">
-            <div class="w-2/3">
-              <div class="text-lg font-black text-white leading-tight uppercase">${o.nombre}</div>
-              <div class="text-[10px] text-orange-400 font-bold mb-1 uppercase">${new Date(o.created_at).toLocaleString()}</div>
-            </div>
-            <span class="px-2 py-1 rounded text-[8px] font-black uppercase ${o.estado === 'aprobado' ? 'bg-green-500/20 text-green-400' : 'bg-yellow-500/20 text-yellow-400'}">${o.estado}</span>
-          </div>
-          
-          <div class="text-xs text-gray-400 mb-2">CI: ${o.cedula} | WhatsApp: <span class="text-white">${o.whatsapp}</span></div>
-          
-          <div class="bg-black/40 p-3 rounded-xl text-[10px] text-yellow-100 font-mono border border-white/5 break-all mb-3">${o.numeros}</div>
-
-          <div class="text-[9px] font-black text-gray-500 uppercase mb-1">📸 Foto Cédula / Pago:</div>
-          <img src="${o.capture_url}" class="user-img" onclick="window.open(this.src)" />
-
-          <div class="flex gap-2 mt-4">
-            <button onclick="updateStatus('${o.id}', 'aprobado')" class="flex-1 py-3 bg-green-500 text-black rounded-xl text-[10px] font-black uppercase">Aprobar</button>
-            <button onclick="updateStatus('${o.id}', 'rechazado')" class="flex-1 py-3 bg-red-500/20 text-red-500 border border-red-500/30 rounded-xl text-[10px] font-bold uppercase">Rechazar</button>
-            <button onclick="deleteOrder('${o.id}')" class="px-4 py-3 bg-white/5 text-gray-600 rounded-xl">🗑️</button>
-          </div>
-          <a href="${waLink}" target="_blank" class="wa-btn mt-3 text-xs uppercase">Chatear con cliente 📲</a>
+  list.innerHTML = pedidos.map(p => {
+    const waNum = '58' + p.whatsapp.replace(/\D/g,'').replace(/^0/,'');
+    return `
+    <div class="card p-4" id="pedido-${p.id}">
+      <div class="flex items-start justify-between mb-3">
+        <div>
+          <div class="font-black text-base">${p.nombre}</div>
+          <div class="text-xs text-gray-400 mt-0.5">${new Date(p.created_at).toLocaleString('es-VE')}</div>
         </div>
-      `;
-    }).join('');
+        <span class="badge badge-${p.estado}">${getBadgeLabel(p.estado)}</span>
+      </div>
+
+      <div class="grid grid-cols-2 gap-2 text-sm mb-3">
+        <div>
+          <span class="text-gray-400 text-xs block">Cédula</span>
+          <span class="font-bold flex items-center gap-0.5">${p.cedula}
+            <button class="copy-btn" onclick="adminCopy('${p.cedula.replace(/'/g,"\\'")}','Cédula copiada ✅')" title="Copiar">📋</button>
+          </span>
+        </div>
+        <div>
+          <span class="text-gray-400 text-xs block">WhatsApp</span>
+          <span class="font-bold text-teal-400 flex items-center gap-0.5">
+            <a href="https://wa.me/${waNum}" target="_blank">${p.whatsapp}</a>
+            <button class="copy-btn" onclick="adminCopy('${p.whatsapp}','WhatsApp copiado ✅')" title="Copiar">📋</button>
+          </span>
+        </div>
+        <div>
+          <span class="text-gray-400 text-xs block">Boletos</span>
+          <span class="font-bold">${p.numeros ? p.numeros.length : 0}</span>
+        </div>
+        <div>
+          <span class="text-gray-400 text-xs block">Total</span>
+          <span class="font-black text-teal-300">Bs. ${p.total}</span>
+        </div>
+        ${p.ref_comprobante ? `
+        <div style="grid-column:span 2">
+          <span class="text-gray-400 text-xs block">Ref. comprobante</span>
+          <span class="font-black text-yellow-300">...${p.ref_comprobante}
+            <button class="copy-btn" onclick="adminCopy('${p.ref_comprobante}','Referencia copiada ✅')" title="Copiar">📋</button>
+          </span>
+        </div>` : ''}
+      </div>
+
+      <div class="mb-3">
+        <div class="text-xs font-bold text-gray-400 mb-1.5">NÚMEROS:</div>
+        <div class="flex flex-wrap">${(p.numeros || []).map(n => `<span class="num-chip">${String(n).padStart(4,'0')}</span>`).join('')}</div>
+      </div>
+
+      ${p.capture_url ? `
+        <div class="mb-3">
+          <div class="text-xs font-bold text-gray-400 mb-1.5">COMPROBANTE:</div>
+          <img src="${p.capture_url}" class="capture-img" onclick="openImgModal('${p.capture_url}')" />
+        </div>` : ''}
+
+      ${p.estado === 'pendiente' ? `
+        <div class="flex gap-2 mt-3">
+          <button class="btn-approve flex-1 py-2.5 text-sm" onclick="approveOrder('${p.id}')">✅ Aprobar</button>
+          <button class="btn-reject flex-1 py-2.5 text-sm" onclick="rejectOrder('${p.id}')">❌ Rechazar</button>
+        </div>` : `
+        <div class="text-xs text-center text-gray-500 mt-2">
+          ${p.estado === 'aprobado' ? '✅ Confirmados' : '❌ Rechazado'}
+        </div>`}
+    </div>`;
+  }).join('');
+}
+
+function getBadgeLabel(e) {
+  return { pendiente:'⏳ Pendiente', aprobado:'✅ Aprobado', rechazado:'❌ Rechazado' }[e] || e;
+}
+
+async function approveOrder(pedidoId) {
+  if (!confirm('¿Aprobar pedido?')) return;
+  try {
+    const { error:e1 } = await db.from('pedidos').update({estado:'aprobado'}).eq('id',pedidoId);
+    if (e1) throw e1;
+    const { error:e2 } = await db.from('tickets').update({estado:'vendido'}).eq('pedido_id',pedidoId);
+    if (e2) throw e2;
+    showToast('✅ Aprobado');
+    await loadPedidos();
+  } catch(err) { showToast('❌ Error'); }
+}
+
+async function rejectOrder(pedidoId) {
+  if (!confirm('¿Rechazar pedido?')) return;
+  try {
+    const { error:e1 } = await db.from('pedidos').update({estado:'rechazado'}).eq('id',pedidoId);
+    if (e1) throw e1;
+    const { error:e2 } = await db.from('tickets').delete().eq('pedido_id',pedidoId);
+    if (e2) throw e2;
+    showToast('🗑️ Rechazado');
+    await loadPedidos();
+  } catch(err) { showToast('❌ Error'); }
+}
+
+function filterPedidos(estado, btn) {
+  currentFilter = estado;
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  applyFilter();
+}
+function searchPedidos(q) { applyFilter(q); }
+function applyFilter(query = document.getElementById('adminSearch').value) {
+  let f = allPedidos;
+  if (currentFilter !== 'todos') f = f.filter(p => p.estado === currentFilter);
+  if (query.trim()) {
+    const q = query.toLowerCase();
+    f = f.filter(p => p.nombre.toLowerCase().includes(q) || p.cedula.toLowerCase().includes(q) || p.whatsapp.includes(q));
   }
+  renderPedidos(f);
+}
 
-  function buscarGanador() {
-    const num = document.getElementById('inputWinner').value.trim().padStart(4, '0');
-    const display = document.getElementById('winnerResult');
-    if (num === "0000" && document.getElementById('inputWinner').value === "") return;
+function openImgModal(url) {
+  document.getElementById('imgModalSrc').src = url;
+  document.getElementById('imgModal').style.display = 'flex';
+}
 
-    const win = allData.find(o => o.numeros.split(',').map(n => n.trim()).includes(num));
+function adminCopy(text, toastMsg) {
+  navigator.clipboard.writeText(text).then(() => showToast(toastMsg, 1800)).catch(() => {
+    const ta = document.createElement('textarea');
+    ta.value = text; ta.style.position = 'fixed'; ta.style.opacity = '0';
+    document.body.appendChild(ta); ta.select();
+    document.execCommand('copy'); document.body.removeChild(ta);
+    showToast(toastMsg, 1800);
+  });
+}
 
-    if (win) {
-      const link = `https://wa.me/${win.whatsapp.replace(/\D/g,'')}?text=${encodeURIComponent(`¡FELICIDADES ${win.nombre}! 🎉 Eres el ganador con el número ${num}.`)}`;
-      display.innerHTML = `
-        <div class="mt-5 p-5 bg-green-500/20 border-2 border-green-500 rounded-2xl text-center">
-            <div class="text-white text-xs uppercase font-bold mb-1">¡Ganador Localizado!</div>
-            <div class="text-green-400 font-black text-2xl uppercase mb-3">${win.nombre} 🏆</div>
-            <a href="${link}" target="_blank" class="bg-green-500 text-black block py-3 rounded-xl font-black text-xs uppercase">Enviar mensaje ganador 📲</a>
-        </div>`;
+document.getElementById('winnerInput').addEventListener('keypress', e => { if (e.key === 'Enter') buscarGanador(); });
+
+async function buscarGanador() {
+  const raw = document.getElementById('winnerInput').value.trim();
+  if (!raw) { showToast('⚠️ Escribe el número', 2000); return; }
+  const num = parseInt(raw);
+  if (isNaN(num) || num < 0 || num > 9999) return;
+
+  const btn = document.getElementById('btnWinner');
+  const resultDiv = document.getElementById('winnerResult');
+  btn.textContent = '⏳'; btn.disabled = true;
+
+  try {
+    const { data:ticketData, error:tErr } = await db.from('tickets').select('numero,estado,pedido_id').eq('numero',num).maybeSingle();
+    if (tErr) throw tErr;
+
+    if (!ticketData || !ticketData.pedido_id) {
+      resultDiv.innerHTML = `<div class="text-center py-4"><p class="font-bold text-gray-300">Sin dueño</p></div>`;
     } else {
-      display.innerHTML = `<div class="mt-4 text-center text-red-500 font-black text-xs uppercase italic">❌ El número ${num} no tiene dueño.</div>`;
+      const { data:pedido, error:pErr } = await db.from('pedidos').select('*').eq('id',ticketData.pedido_id).single();
+      if (pErr) throw pErr;
+
+      const waNum  = '58' + pedido.whatsapp.replace(/\D/g,'').replace(/^0/,'');
+      const waMsg  = encodeURIComponent(`¡Hola ${pedido.nombre}! 🎉 El número *${String(num).padStart(4,'0')}* ES EL GANADOR. ¡Felicidades! 🎟️`);
+      const waLink = `https://wa.me/${waNum}?text=${waMsg}`;
+
+      resultDiv.innerHTML = `
+        <div class="winner-result p-4">
+          <div class="text-center mb-3">
+            <div class="text-yellow-300 font-black text-lg mt-1">¡GANADOR!</div>
+            <div class="text-2xl font-black mt-1">${String(num).padStart(4,'0')}</div>
+          </div>
+          <div class="space-y-2 text-sm">
+            <div class="flex justify-between"><span class="text-gray-400">👤 Nombre:</span><span class="font-black">${pedido.nombre}</span></div>
+            <div class="flex justify-between"><span class="text-gray-400">📱 WhatsApp:</span><span class="font-bold">${pedido.whatsapp}</span></div>
+          </div>
+          <a href="${waLink}" target="_blank" style="display:block;margin-top:14px;background:#16A34A;color:#fff;font-weight:900;border-radius:12px;padding:12px;text-align:center;">📲 Notificar ganador</a>
+        </div>`;
     }
-  }
+  } catch(err) { resultDiv.innerHTML = `<div class="text-center text-red-400 text-sm py-3">❌ Error</div>`; } finally { btn.textContent = '🔍 Buscar'; btn.disabled = false; }
+}
 
-  async function updateStatus(id, s) {
-    await db.from('pedidos').update({ estado: s }).eq('id', id);
-    if (s === 'rechazado') {
-      await db.from('tickets').delete().eq('pedido_id', id);
+async function reiniciarRifa() {
+  const ok = confirm('⚠️ ¿CERRAR Y ARCHIVAR LA RIFA ACTUAL?\n\nEsto guardará el Top de Compradores, el ganador y el historial antes de limpiar la mesa.');
+  if (!ok) return;
+
+  const palabra = prompt('🔑 Palabra de confirmación:\n\nKley');
+  if (palabra !== 'Kley') return;
+
+  // 1. Pedimos el número ganador de esta jornada para guardarlo en la historia
+  const numGanadorStr = prompt('🏆 Ingresa el NÚMERO GANADOR de esta rifa (4 dígitos, ej: 0125):');
+  if (!numGanadorStr || !/^\d{1,4}$/.test(numGanadorStr)) {
+    alert('❌ Número inválido. Operación cancelada para proteger los datos.');
+    return;
+  }
+  const numGanador = parseInt(numGanadorStr, 10);
+
+  try {
+    showToast('⏳ Archivando datos... No cierres esta ventana', 4000);
+
+    // 2. Tomamos la "foto" de todos los pedidos aprobados
+    const { data: pedidosAprobados, error: errPed } = await db.from('pedidos').select('*').eq('estado', 'aprobado');
+    if (errPed) throw errPed;
+
+    // 3. Calculamos automáticamente el Top 10 de compradores
+    let conteo = {};
+    (pedidosAprobados || []).forEach(p => {
+      if (!conteo[p.cedula]) conteo[p.cedula] = { nombre: p.nombre, cantidad: 0 };
+      conteo[p.cedula].cantidad += (p.numeros ? p.numeros.length : 0);
+    });
+    const top10 = Object.values(conteo).sort((a, b) => b.cantidad - a.cantidad).slice(0, 10);
+
+    // 4. Buscamos quién fue el ganador en la base de datos
+    let nombreGanador = 'Sin ganador / No vendido';
+    const pedidoGanador = (pedidosAprobados || []).find(p => (p.numeros || []).includes(numGanador));
+    if (pedidoGanador) nombreGanador = pedidoGanador.nombre;
+
+    // 5. Obtenemos el flyer actual para guardarlo en la historia
+    const { data: config } = await db.from('landing_config').select('flyer_url').eq('id', 'main').maybeSingle();
+    const flyerAntiguo = config ? config.flyer_url : null;
+
+    // 6. Guardamos todo el paquete en la nueva tabla (La Fotografía Histórica)
+    const { error: errHist } = await db.from('historial_rifas').insert([{
+      flyer_url: flyerAntiguo,
+      ganador_numero: String(numGanador).padStart(4, '0'),
+      ganador_nombre: nombreGanador,
+      top_compradores: top10,
+      pedidos_snapshot: pedidosAprobados
+    }]);
+    if (errHist) throw errHist;
+
+    // 7. REGLA DE LAS 4 RIFAS: Borramos las más viejas si hay más de 3 en el historial (3 viejas + 1 actual = 4)
+    const { data: historiales, error: errSelHist } = await db.from('historial_rifas').select('id').order('fecha_cierre', { ascending: true });
+    if (!errSelHist && historiales && historiales.length > 3) {
+      const idsABorrar = historiales.slice(0, historiales.length - 3).map(h => h.id);
+      await db.from('historial_rifas').delete().in('id', idsABorrar);
     }
-    loadData();
-    showToast(s === 'rechazado' ? "RECHAZADO Y NÚMEROS LIBERADOS" : "ESTADO ACTUALIZADO");
-  }
 
-  async function deleteOrder(id) {
-    if (!confirm("¿Eliminar este registro?")) return;
-    await db.from('tickets').delete().eq('pedido_id', id);
-    await db.from('pedidos').delete().eq('id', id);
-    loadData();
-  }
+    // 8. AHORA SÍ: Limpiamos la mesa para la nueva Rifa (TU CÓDIGO ORIGINAL INTACTO)
+    await db.from('tickets').delete().gte('numero', 0);
+    await db.from('pedidos').delete().in('estado', ['pendiente', 'aprobado', 'rechazado']);
 
-  async function resetearSistema() {
-    if (prompt("Escribe BORRAR para limpiar la base de datos:") === "BORRAR") {
-      await db.from('tickets').delete().not('numero', 'is', null);
-      await db.from('pedidos').delete().not('id', 'is', null);
-      loadData();
-      cerrarAjustes();
+    alert('✅ ¡Rifa archivada con éxito! La mesa está limpia para una nueva jornada.');
+    location.reload();
+  } catch(err) {
+    console.error(err);
+    showToast('❌ Error crítico al archivar la rifa. Revisa tu conexión.', 4000);
+  }
+}
+
+async function cambiarEstadoVentas(activo) {
+  const confirmacion = confirm(activo ? '¿ABRIR VENTAS?' : '¿PAUSAR VENTAS?');
+  if (!confirmacion) return;
+  try {
+    await db.from('landing_config').update({ ventas_activas: activo }).eq('id', 'main');
+    showToast(activo ? '✅ VENTAS ABIERTAS' : '🛑 VENTAS PAUSADAS', 4000);
+  } catch(err) { showToast('❌ Error', 4000); }
+}
+
+function toggleLandingPanel() {
+  const panel = document.getElementById('landingEditPanel');
+  panel.style.display = panel.style.display === 'none' ? 'block' : 'none';
+}
+
+async function loadLandingConfig() {
+  try {
+    const { data } = await db.from('landing_config').select('*').eq('id','main').maybeSingle();
+    if (data) {
+      if (data.mensaje) document.getElementById('landingMsgInput').value = data.mensaje;
+      if (data.flyer_url) {
+        document.getElementById('flyerPreview').src = data.flyer_url;
+        document.getElementById('flyerPreview').style.display = 'block';
+      }
     }
-  }
+  } catch(e) {}
+}
 
-  async function updateVentas(e) {
-    await db.from('landing_config').update({ ventas_activas: e }).eq('id', 'main');
-    showToast(e ? "VENTAS ABIERTAS" : "VENTAS PAUSADAS");
-  }
+function previewFlyer(input) {
+  flyerFile = input.files[0];
+  if (!flyerFile) return;
+  const reader = new FileReader();
+  reader.onload = e => {
+    document.getElementById('flyerPreview').src = e.target.result;
+    document.getElementById('flyerPreview').style.display = 'block';
+  };
+  reader.readAsDataURL(flyerFile);
+}
 
-  function abrirAjustes() { document.getElementById('ajustesModal').style.display = 'flex'; }
-  function cerrarAjustes() { document.getElementById('ajustesModal').style.display = 'none'; }
-  function showToast(m) {
-    const t = document.createElement('div'); t.className = 'toast'; t.textContent = m;
-    document.body.appendChild(t); setTimeout(() => t.remove(), 2500);
-  }
+async function saveLandingContent() {
+  const mensaje = document.getElementById('landingMsgInput').value.trim();
+  let flyerUrl  = null;
+  try {
+    if (flyerFile) {
+      const ext = flyerFile.name.split('.').pop();
+      const path = `flyers/landing_${Date.now()}.${ext}`;
+      await db.storage.from('captures').upload(path, flyerFile, { contentType:flyerFile.type, upsert:true });
+      flyerUrl = db.storage.from('captures').getPublicUrl(path).data.publicUrl;
+    }
+    const payload = { id:'main', mensaje };
+    if (flyerUrl) payload.flyer_url = flyerUrl;
+    await db.from('landing_config').upsert([payload], { onConflict:'id' });
+    showToast('✅ Guardado', 2500);
+    toggleLandingPanel();
+  } catch(err) { showToast('❌ Error', 3500); }
+}
+
+function showToast(msg, duration = 2500) {
+  const ex = document.querySelector('.toast'); if (ex) ex.remove();
+  const t = document.createElement('div');
+  t.className = 'toast'; t.textContent = msg;
+  document.body.appendChild(t);
+  setTimeout(() => t.remove(), duration);
+}
 </script>
 </body>
 </html>

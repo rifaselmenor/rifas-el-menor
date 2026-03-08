@@ -2,343 +2,669 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-  <title>Rifa Gratis M </title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0" />
+  <title>Rifas El Menor 🎟️</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&family=Space+Grotesk:wght@400;500;700&display=swap" rel="stylesheet" />
   <style>
     :root {
-      --gold:#EAB308;--gold-light:#FDE68A;--gold-dark:#A16207;
-      --orange:#F97316;--orange-light:#FDBA74;--orange-dark:#C2410C;
-      --bg:#0a0a0f;--surface:#111118;--surface2:#1a1a24;
-      --text:#F1F0FF;--text-muted:#9B9BAA;
+      --purple:#7C3AED; --purple-light:#A78BFA; --purple-dark:#5B21B6;
+      --sky:#0EA5E9; --sky-light:#7DD3FC;
+      --teal:#14B8A6; --teal-light:#5EEAD4;
+      --bg:#0F0A1E; --surface:#1A1035; --surface2:#231448;
+      --text:#F1F0FF; --text-muted:#9B8EC4;
     }
-    *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
-    body{font-family:'Nunito',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;overflow-x:hidden;}
-    body::before{content:'';position:fixed;inset:0;
-      background:radial-gradient(ellipse at 20% 0%,rgba(234,179,8,.18) 0%,transparent 60%),
-        radial-gradient(ellipse at 80% 100%,rgba(249,115,22,.15) 0%,transparent 60%),
-        radial-gradient(ellipse at 80% 20%,rgba(234,179,8,.10) 0%,transparent 50%);
-      pointer-events:none;z-index:0;}
-    .content{position:relative;z-index:1;}
-    .header-glow{background:linear-gradient(135deg,#0f0f00 0%,#0a0a0f 50%,#1a0a00 100%);
-      border-bottom:1px solid rgba(234,179,8,.35);box-shadow:0 4px 40px rgba(234,179,8,.2);}
-    .logo-text{font-family:'Space Grotesk',sans-serif;font-weight:800;font-size:1.35rem;
-      background:linear-gradient(135deg,#A16207 0%,#EAB308 25%,#FDE68A 40%,#F97316 60%,#FDBA74 75%,#EAB308 90%,#A16207 100%);
-      background-size:200% auto;-webkit-background-clip:text;-webkit-text-fill-color:transparent;
-      background-clip:text;animation:shimmer 3s linear infinite;
-      filter:drop-shadow(0 0 8px rgba(234,179,8,.5)) drop-shadow(0 0 14px rgba(249,115,22,.2));}
-    @keyframes shimmer{0%{background-position:-200% 0}100%{background-position:200% 0}}
-    .slogan-neon{font-size:10px;font-weight:800;letter-spacing:.05em;color:var(--orange-light);
-      text-shadow:0 0 5px rgba(253,186,116,1),0 0 12px rgba(253,186,116,.7),0 0 25px rgba(249,115,22,.5);
-      animation:neonPulse 2.6s ease-in-out infinite;}
-    @keyframes neonPulse{0%,100%{opacity:1}50%{opacity:.75}}
-    .stat-card{background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);border-radius:14px;backdrop-filter:blur(10px);}
-    .sales-card{background:rgba(234,179,8,.07);border:1px solid rgba(234,179,8,.25);border-radius:14px;
-      backdrop-filter:blur(10px);padding:8px 12px;min-width:115px;flex-shrink:0;}
-    .sales-track{height:7px;background:rgba(255,255,255,.1);border-radius:999px;overflow:hidden;margin:3px 0;}
-    .sales-fill{height:100%;border-radius:999px;background:linear-gradient(90deg,#EAB308,#F97316);
-      transition:width .7s cubic-bezier(.4,0,.2,1);}
-    .ticket-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:5px;}
-    @media(min-width:400px){.ticket-grid{grid-template-columns:repeat(6,1fr);gap:6px;}}
-    @media(min-width:640px){.ticket-grid{grid-template-columns:repeat(8,1fr);gap:8px;}}
-    .ticket{aspect-ratio:1;display:flex;align-items:center;justify-content:center;
-      border-radius:8px;font-size:10px;font-weight:700;cursor:pointer;
-      transition:transform .15s,box-shadow .15s;border:1.5px solid transparent;
-      user-select:none;position:relative;overflow:hidden;touch-action: manipulation;}
-    @media(min-width:400px){.ticket{font-size:11px;border-radius:10px;}}
-    .ticket-available{background:rgba(255,255,255,.06);border-color:rgba(255,255,255,.12);color:var(--text-muted);}
-    .ticket-available:active{transform:scale(.9);}
-    .ticket-selected{background:linear-gradient(135deg,#A16207 0%,#EAB308 50%,#F97316 100%);
-      border-color:var(--gold-light);color:#000;box-shadow:0 4px 15px rgba(234,179,8,.5);transform:scale(1.05);}
-    .ticket-selected::after{content:'';position:absolute;top:2px;right:3px;font-size:8px;opacity:.8;}
-    .search-input{background:rgba(255,255,255,.07);border:1.5px solid rgba(255,255,255,.15);
-      border-radius:12px;color:#fff;outline:none;transition:border-color .2s,box-shadow .2s;}
-    .search-input:focus{border-color:var(--gold-light);box-shadow:0 0 0 3px rgba(234,179,8,.2);}
-    .search-input::placeholder{color:var(--text-muted);}
-    .form-input{background:rgba(255,255,255,.06);border:1.5px solid rgba(255,255,255,.12);
-      border-radius:12px;color:#fff;outline:none;width:100%;font-family:'Nunito',sans-serif;
-      transition:border-color .2s,box-shadow .2s;}
-    .form-input:focus{border-color:var(--gold-light);box-shadow:0 0 0 3px rgba(234,179,8,.2);}
-    .form-input::placeholder{color:var(--text-muted);}
-    .btn-primary{background:linear-gradient(135deg,#A16207 0%,#EAB308 50%,#F97316 100%);
-      border:none;color:#000;font-weight:800;border-radius:14px;cursor:pointer;
-      transition:transform .15s;box-shadow:0 4px 20px rgba(234,179,8,.4);font-family:'Nunito',sans-serif;}
-    .btn-primary:active{transform:scale(.97);}
-    .btn-teal{background:linear-gradient(135deg,#C2410C 0%,#F97316 100%);border:none;color:#fff;
-      font-weight:800;border-radius:14px;cursor:pointer;transition:transform .15s;
-      box-shadow:0 4px 20px rgba(249,115,22,.4);font-family:'Nunito',sans-serif;}
-    .btn-teal:active{transform:scale(.97);}
-    .btn-verify{background:rgba(234,179,8,.12);border:1.5px solid rgba(234,179,8,.5);
-      color:var(--gold-light);font-weight:800;border-radius:14px;cursor:pointer;
-      transition:all .15s;font-family:'Nunito',sans-serif;
-      display:flex;align-items:center;justify-content:center;gap:8px;width:100%;}
-    .btn-verify:active{background:rgba(234,179,8,.25);transform:scale(.97);}
-    .btn-outline{background:transparent;border:1.5px solid rgba(255,255,255,.2);color:var(--text-muted);
-      font-weight:700;border-radius:14px;cursor:pointer;transition:all .15s;font-family:'Nunito',sans-serif;}
-    .btn-outline:active{background:rgba(255,255,255,.05);}
-    .floating-bar{position:fixed;bottom:0;left:0;right:0;background:rgba(10,10,15,.97);
-      border-top:1px solid rgba(234,179,8,.3);backdrop-filter:blur(20px);z-index:100;
-      padding-bottom:env(safe-area-inset-bottom);}
-    .page-btn{background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.12);border-radius:10px;
-      color:var(--text-muted);padding:8px 14px;cursor:pointer;font-weight:700;font-size:13px;
-      transition:all .15s;font-family:'Nunito',sans-serif;}
-    .page-btn:disabled{opacity:.3;cursor:not-allowed;}
-    .modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.8);backdrop-filter:blur(8px);
-      z-index:200;display:flex;align-items:flex-end;animation:fadeIn .2s ease;}
-    @keyframes fadeIn{from{opacity:0}to{opacity:1}}
-    .modal-sheet{width:100%;background:var(--surface);border-top-left-radius:28px;
-      border-top-right-radius:28px;border-top:1px solid rgba(234,179,8,.35);
-      max-height:92vh;overflow-y:auto;animation:slideUp .3s cubic-bezier(.34,1.56,.64,1);}
-    @keyframes slideUp{from{transform:translateY(100%)}to{transform:translateY(0)}}
-    .modal-center{position:fixed;inset:0;background:rgba(0,0,0,.88);backdrop-filter:blur(10px);
-      z-index:400;display:flex;align-items:center;justify-content:center;
-      padding:16px;animation:fadeIn .25s ease;}
-    .modal-card{background:var(--surface);border:1px solid rgba(234,179,8,.35);border-radius:24px;
-      width:100%;max-width:440px;max-height:90vh;overflow-y:auto;
-      animation:cardIn .28s cubic-bezier(.34,1.56,.64,1);}
-    @keyframes cardIn{from{opacity:0;transform:scale(.92)}to{opacity:1;transform:scale(1)}}
-    .terms-item{display:flex;gap:10px;padding:10px 12px;background:rgba(255,255,255,.04);
-      border-radius:12px;border:1px solid rgba(255,255,255,.07);margin-bottom:8px;}
-    .terms-icon{font-size:18px;flex-shrink:0;margin-top:2px;}
-    .cd-ring{width:72px;height:72px;border-radius:50%;margin:0 auto 12px;
-      background:conic-gradient(var(--orange) var(--pct,0%),rgba(255,255,255,.08) 0%);
-      display:flex;align-items:center;justify-content:center;}
-    .cd-inner{width:54px;height:54px;border-radius:50%;background:var(--surface);
-      display:flex;align-items:center;justify-content:center;font-size:24px;font-weight:900;color:var(--orange-light);}
-    .upload-area{border:2px dashed rgba(255,255,255,.2);border-radius:14px;
-      background:rgba(255,255,255,.03);transition:border-color .2s,background .2s;cursor:pointer;}
-    .upload-area:active{border-color:var(--gold-light);background:rgba(234,179,8,.08);}
-    .payment-box{background:linear-gradient(135deg,rgba(249,115,22,.15) 0%,rgba(234,179,8,.1) 100%);
-      border:1px solid rgba(249,115,22,.4);border-radius:16px;}
-    .selected-chip{background:rgba(234,179,8,.3);border:1px solid rgba(253,230,138,.4);
-      border-radius:8px;padding:4px 10px;font-size:12px;font-weight:700;color:var(--gold-light);}
-    .copy-btn{background:none;border:none;cursor:pointer;padding:2px 5px;
-      color:var(--orange-light);font-size:13px;opacity:.7;transition:opacity .15s,transform .15s;vertical-align:middle;}
-    .copy-btn:active{opacity:1;transform:scale(.82);}
-    .wa-support{position:fixed;bottom:122px;right:15px;z-index:150;width:52px;height:52px;border-radius:50%;
-      background:linear-gradient(135deg,#25D366,#128C7E);display:flex;align-items:center;justify-content:center;
-      box-shadow:0 4px 22px rgba(37,211,102,.55);text-decoration:none;
-      animation:waFloat 3s ease-in-out infinite;transition:transform .15s;}
-    .wa-support:active{transform:scale(.9) !important;}
-    @keyframes waFloat{0%,100%{transform:translateY(0);}50%{transform:translateY(-6px);}}
-    .toast{position:fixed;top:20px;left:50%;transform:translateX(-50%);
-      background:var(--surface2);border:1px solid rgba(255,255,255,.15);
-      border-radius:14px;padding:12px 20px;font-weight:700;font-size:14px;
-      z-index:9999;animation:toastIn .3s ease;box-shadow:0 8px 30px rgba(0,0,0,.5);max-width:90vw;text-align:center;}
-    @keyframes toastIn{from{opacity:0;transform:translateX(-50%) translateY(-10px)}to{opacity:1;transform:translateX(-50%) translateY(0)}}
-    ::-webkit-scrollbar{width:4px}::-webkit-scrollbar-track{background:transparent}::-webkit-scrollbar-thumb{background:rgba(234,179,8,.4);border-radius:4px}
+    * { box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+    body {
+      font-family:'Nunito',sans-serif;
+      background:var(--bg); color:var(--text);
+      min-height:100vh; overflow-x:hidden;
+    }
+    body::before {
+      content:''; position:fixed; inset:0;
+      background:
+        radial-gradient(ellipse at 20% 0%,   rgba(124,58,237,.25) 0%, transparent 60%),
+        radial-gradient(ellipse at 80% 100%, rgba(20,184,166,.2)  0%, transparent 60%),
+        radial-gradient(ellipse at 80% 20%,  rgba(14,165,233,.15) 0%, transparent 50%);
+      pointer-events:none; z-index:0;
+    }
+    .content { position:relative; z-index:1; }
+
+    /* Ocultar barra de scroll en carrusel y modales largos */
+    .hide-scrollbar::-webkit-scrollbar { display: none; }
+    .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
+    /* ══ ESTILOS TICKET GRID Y UI ══ */
+    .ticket-grid { display:grid; grid-template-columns:repeat(5,1fr); gap:5px; }
+    @media(min-width:400px){ .ticket-grid{ grid-template-columns:repeat(6,1fr); gap:6px; } }
+    @media(min-width:640px){ .ticket-grid{ grid-template-columns:repeat(8,1fr); gap:8px; } }
+    .ticket {
+      aspect-ratio:1; display:flex; align-items:center; justify-content:center;
+      border-radius:8px; font-size:10px; font-weight:700; cursor:pointer;
+      transition:transform .15s, box-shadow .15s;
+      border:1.5px solid transparent; user-select:none; position:relative; overflow:hidden;
+    }
+    @media(min-width:400px){ .ticket{ font-size:11px; border-radius:10px; } }
+    .ticket-available {
+      background:rgba(255,255,255,.06); border-color:rgba(255,255,255,.12); color:var(--text-muted);
+    }
+    .ticket-available:active { transform:scale(.9); }
+    .ticket-selected {
+      background:linear-gradient(135deg,var(--purple) 0%,var(--sky) 100%);
+      border-color:var(--sky-light); color:#fff;
+      box-shadow:0 4px 15px rgba(124,58,237,.5); transform:scale(1.05);
+    }
+    .ticket-selected::after { content:'✓'; position:absolute; top:2px; right:3px; font-size:8px; opacity:.8; }
+
+    /* ══ INPUTS ══ */
+    .search-input {
+      background:rgba(255,255,255,.07); border:1.5px solid rgba(255,255,255,.15);
+      border-radius:12px; color:#fff; outline:none; transition:border-color .2s,box-shadow .2s;
+    }
+    .search-input:focus { border-color:var(--purple-light); box-shadow:0 0 0 3px rgba(124,58,237,.2); }
+    .search-input::placeholder { color:var(--text-muted); }
+    .form-input {
+      background:rgba(255,255,255,.06); border:1.5px solid rgba(255,255,255,.12);
+      border-radius:12px; color:#fff; outline:none; width:100%;
+      font-family:'Nunito',sans-serif; transition:border-color .2s,box-shadow .2s;
+    }
+    .form-input:focus { border-color:var(--purple-light); box-shadow:0 0 0 3px rgba(124,58,237,.2); }
+    .form-input::placeholder { color:var(--text-muted); }
+
+    /* ══ BUTTONS ══ */
+    .btn-primary {
+      background:linear-gradient(135deg,var(--purple) 0%,var(--sky) 100%);
+      border:none; color:#fff; font-weight:800; border-radius:14px; cursor:pointer;
+      transition:transform .15s; box-shadow:0 4px 20px rgba(124,58,237,.4);
+      font-family:'Nunito',sans-serif;
+    }
+    .btn-primary:active { transform:scale(.97); }
+    .btn-teal {
+      background:linear-gradient(135deg,var(--teal) 0%,var(--sky) 100%);
+      border:none; color:#fff; font-weight:800; border-radius:14px; cursor:pointer;
+      transition:transform .15s; box-shadow:0 4px 20px rgba(20,184,166,.4);
+      font-family:'Nunito',sans-serif;
+    }
+    .btn-teal:active { transform:scale(.97); }
+    .btn-verify {
+      background:rgba(124,58,237,.12); border:1.5px solid rgba(167,139,250,.5);
+      color:var(--purple-light); font-weight:800; border-radius:14px;
+      cursor:pointer; transition:all .15s; font-family:'Nunito',sans-serif;
+      display:flex; align-items:center; justify-content:center; gap:8px; width:100%;
+    }
+    .btn-verify:active { background:rgba(124,58,237,.25); transform:scale(.97); }
+    .btn-outline {
+      background:transparent; border:1.5px solid rgba(255,255,255,.2);
+      color:var(--text-muted); font-weight:700; border-radius:14px; cursor:pointer;
+      transition:all .15s; font-family:'Nunito',sans-serif;
+    }
+    .btn-outline:active { background:rgba(255,255,255,.05); }
+
+    /* ══ FLOATING BAR ══ */
+    .floating-bar {
+      position:fixed; bottom:0; left:0; right:0;
+      background:rgba(15,10,30,.95); border-top:1px solid rgba(124,58,237,.3);
+      backdrop-filter:blur(20px); z-index:100;
+      padding-bottom:env(safe-area-inset-bottom);
+    }
+    .page-btn {
+      background:rgba(255,255,255,.07); border:1px solid rgba(255,255,255,.12);
+      border-radius:10px; color:var(--text-muted);
+      padding:8px 14px; cursor:pointer;
+      font-weight:700; font-size:13px; transition:all .15s; font-family:'Nunito',sans-serif;
+    }
+    .page-btn:disabled { opacity:.3; cursor:not-allowed; }
+
+    /* ══ MODALS ══ */
+    .modal-overlay {
+      position:fixed; inset:0; background:rgba(0,0,0,.8);
+      backdrop-filter:blur(8px); z-index:200;
+      display:flex; align-items:flex-end; animation:fadeIn .2s ease;
+    }
+    @keyframes fadeIn { from{ opacity:0 } to{ opacity:1 } }
+    .modal-sheet {
+      width:100%; background:var(--surface);
+      border-top-left-radius:28px; border-top-right-radius:28px;
+      border-top:1px solid rgba(124,58,237,.4);
+      max-height:92vh; overflow-y:auto;
+      animation:slideUp .3s cubic-bezier(.34,1.56,.64,1);
+    }
+    @keyframes slideUp { from{ transform:translateY(100%) } to{ transform:translateY(0) } }
+
+    /* Modal centrado para Términos */
+    .modal-center {
+      position:fixed; inset:0; background:rgba(0,0,0,.92);
+      backdrop-filter:blur(10px); z-index:400;
+      display:flex; align-items:center; justify-content:center;
+      padding:16px; animation:fadeIn .25s ease;
+    }
+    .modal-card {
+      background:var(--surface); border:1px solid rgba(124,58,237,.4);
+      border-radius:24px; width:100%; max-width:440px; max-height:90vh;
+      overflow-y:auto; animation:cardIn .28s cubic-bezier(.34,1.56,.64,1);
+    }
+    @keyframes cardIn { from{ opacity:0; transform:scale(.92) } to{ opacity:1; transform:scale(1) } }
+
+    .terms-item {
+      display:flex; gap:10px; padding:10px 12px;
+      background:rgba(255,255,255,.04); border-radius:12px;
+      border:1px solid rgba(255,255,255,.07); margin-bottom:8px;
+    }
+    .terms-icon { font-size:18px; flex-shrink:0; margin-top:2px; }
+
+    /* Countdown */
+    .cd-ring {
+      width:72px; height:72px; border-radius:50%; margin:0 auto 12px;
+      background:conic-gradient(var(--teal) var(--pct,0%),rgba(255,255,255,.08) 0%);
+      display:flex; align-items:center; justify-content:center;
+    }
+    .cd-inner {
+      width:54px; height:54px; border-radius:50%; background:var(--surface);
+      display:flex; align-items:center; justify-content:center;
+      font-size:24px; font-weight:900; color:var(--teal-light);
+    }
+
+    /* Payment / chips / upload */
+    .upload-area {
+      border:2px dashed rgba(255,255,255,.2); border-radius:14px;
+      background:rgba(255,255,255,.03); transition:border-color .2s,background .2s; cursor:pointer;
+    }
+    .upload-area:active { border-color:var(--purple-light); background:rgba(124,58,237,.08); }
+    .payment-box {
+      background:linear-gradient(135deg,rgba(20,184,166,.15) 0%,rgba(14,165,233,.1) 100%);
+      border:1px solid rgba(20,184,166,.4); border-radius:16px;
+    }
+    .selected-chip {
+      background:rgba(124,58,237,.3); border:1px solid rgba(167,139,250,.4);
+      border-radius:8px; padding:4px 10px; font-size:12px; font-weight:700; color:var(--purple-light);
+    }
+    .vr-card { border-radius:16px; padding:14px; margin-bottom:10px; border:1px solid rgba(255,255,255,.1); }
+    .vr-num {
+      background:rgba(124,58,237,.3); border:1px solid rgba(167,139,250,.35);
+      border-radius:6px; padding:3px 8px; font-size:11px; font-weight:800;
+      color:var(--purple-light); display:inline-block; margin:2px;
+    }
+
+    /* Botón copiar */
+    .copy-btn {
+      background:none; border:none; cursor:pointer; padding:2px 5px;
+      color:var(--teal-light); font-size:13px; opacity:.7;
+      transition:opacity .15s,transform .15s; vertical-align:middle;
+    }
+    .copy-btn:active { opacity:1; transform:scale(.82); }
+
+    /* WA flotante */
+    .wa-support {
+      position:fixed; bottom:122px; right:15px; z-index:150;
+      width:52px; height:52px; border-radius:50%;
+      background:linear-gradient(135deg,#25D366,#128C7E);
+      display:flex; align-items:center; justify-content:center;
+      box-shadow:0 4px 22px rgba(37,211,102,.55); text-decoration:none;
+      animation:waFloat 3s ease-in-out infinite; transition:transform .15s;
+    }
+    .wa-support:active { transform:scale(.9) !important; }
+    @keyframes waFloat { 0%,100%{ transform:translateY(0); } 50%{ transform:translateY(-6px); } }
+
+    /* Toast */
+    .toast {
+      position:fixed; top:20px; left:50%; transform:translateX(-50%);
+      background:var(--surface2); border:1px solid rgba(255,255,255,.15);
+      border-radius:14px; padding:12px 20px; font-weight:700; font-size:14px;
+      z-index:9999; animation:toastIn .3s ease;
+      box-shadow:0 8px 30px rgba(0,0,0,.5); max-width:90vw; text-align:center;
+    }
   </style>
 </head>
-
 <body>
 <div class="content">
 
-  <header class="header-glow sticky top-0 z-50">
-    <div class="px-4 py-3">
-      <div class="flex items-start justify-between gap-2">
-        <div class="min-w-0">
-          <div class="logo-text"> Rifa Gratis M</div>
-          <div class="slogan-neon mt-0.5"> Tu suerte comienza aqu� � �Participa ya!</div>
-        </div>
-        <div class="sales-card">
-          <div class="flex justify-between items-center">
-            <span class="text-xs text-gray-400 font-bold">Vendidos</span>
-            <span class="text-xs font-black text-yellow-400" id="salesPct">0%</span>
+  <div class="carousel-wrapper relative w-full overflow-hidden bg-black" id="headerCarousel">
+    <div id="mainCarousel" class="flex overflow-x-auto snap-x snap-mandatory scroll-smooth hide-scrollbar">
+      
+      <div class="min-w-full snap-center relative">
+        <img id="activeFlyerImg" src="https://via.placeholder.com/600x800?text=Cargando..." class="w-full aspect-[4/5] object-cover" alt="Sorteo Actual">
+        <div class="absolute inset-0 bg-gradient-to-t from-black via-black/50 to-transparent flex flex-col justify-end p-4 pb-8">
+          
+          <div class="flex items-center gap-2 mb-2">
+            <span class="bg-green-500 rounded-full w-2 h-2 animate-pulse"></span>
+            <span class="text-xs font-black text-green-400 tracking-widest uppercase">EN VIVO</span>
           </div>
-          <div class="sales-track"><div class="sales-fill" id="salesFill" style="width:0%"></div></div>
-          <div class="flex justify-between">
-            <span class="text-xs font-black text-yellow-400" id="salesSold">0</span>
-            <span class="text-xs text-white/40" id="salesRem">10,000</span>
+
+          <h2 id="activeMsgText" class="text-2xl font-black text-white drop-shadow-lg mb-3">Cargando información...</h2>
+          
+          <div class="w-full mb-4 bg-black/60 backdrop-blur-md border border-white/20 p-3 rounded-xl shadow-[0_4px_20px_rgba(0,0,0,0.5)]">
+             <div class="flex justify-between items-center mb-1">
+               <span class="text-xs text-gray-300 font-bold">Progreso de Ventas</span>
+               <span class="text-xs font-black text-sky-400" id="salesPct">0%</span>
+             </div>
+             <div class="bg-white/10 h-2 rounded-full overflow-hidden mb-1">
+               <div class="bg-gradient-to-r from-teal-400 to-sky-500 h-full transition-all duration-700" id="salesFill" style="width:0%"></div>
+             </div>
+             <div class="flex justify-between">
+               <span class="text-[10px] font-black text-sky-400" id="salesSold">0</span>
+               <span class="text-[10px] text-white/40"><span id="salesRem">10,000</span> restantes</span>
+             </div>
+          </div>
+
+          <div class="grid grid-cols-2 gap-2">
+            <button onclick="comenzarCompra()" class="bg-gradient-to-r from-purple-600 to-sky-500 text-white font-black py-3 rounded-xl shadow-[0_4px_20px_rgba(124,58,237,0.4)] transform transition active:scale-95 text-sm">💳 COMPRAR TICKETS</button>
+            <div class="flex flex-col gap-2">
+               <button onclick="openVerifyModal()" class="bg-white/10 border border-white/20 text-white font-bold py-1.5 rounded-lg text-xs backdrop-blur-sm active:bg-white/20">🔍 Mis Tickets</button>
+               <button onclick="abrirTopTenLive()" class="bg-yellow-500/20 border border-yellow-500/50 text-yellow-400 font-bold py-1.5 rounded-lg text-xs backdrop-blur-sm active:bg-yellow-500/30">🏆 Ver Top 10</button>
+            </div>
           </div>
         </div>
       </div>
-      <div class="grid grid-cols-3 gap-2 mt-3">
-        <div class="stat-card p-2 text-center">
-          <div class="text-xs text-gray-400">Precio</div>
-          <div class="text-sm font-black text-yellow-400"><span id="statPrecio">GRATIS</span></div>
-        </div>
-        <div class="stat-card p-2 text-center">
-          <div class="text-xs text-gray-400">Obligatorio</div>
-          <div class="text-sm font-black text-orange-400"><span id="statMin">30</span> tickets</div>
-        </div>
-        <div class="stat-card p-2 text-center">
-          <div class="text-xs text-gray-400">Disponibles</div>
-          <div class="text-sm font-black text-yellow-200" id="statDisp">10,000</div>
-        </div>
+      </div>
+    
+    <button id="btnCarPrev" onclick="scrollCarousel(-1)" class="hidden absolute left-2 top-1/2 -translate-y-1/2 bg-black/60 text-white w-10 h-10 flex items-center justify-center rounded-full backdrop-blur-md border border-white/20 z-10 text-xl font-bold">❮</button>
+    <button id="btnCarNext" onclick="scrollCarousel(1)" class="hidden absolute right-2 top-1/2 -translate-y-1/2 bg-black/60 text-white w-10 h-10 flex items-center justify-center rounded-full backdrop-blur-md border border-white/20 z-10 text-xl font-bold">❯</button>
+  </div>
+
+  <main id="mainTicketSection" class="px-3 pt-4 pb-36" style="display:none;">
+
+    <div class="grid grid-cols-3 gap-2 mb-4">
+      <div class="bg-white/5 border border-white/10 rounded-xl p-2 text-center backdrop-blur-md">
+        <div class="text-xs text-gray-400">Precio</div>
+        <div class="text-sm font-black text-teal-400">Bs. <span id="statPrecio">5</span></div>
+      </div>
+      <div class="bg-white/5 border border-white/10 rounded-xl p-2 text-center backdrop-blur-md">
+        <div class="text-xs text-gray-400">Mínimo</div>
+        <div class="text-sm font-black text-sky-400"><span id="statMin">20</span> tickets</div>
+      </div>
+      <div class="bg-white/5 border border-white/10 rounded-xl p-2 text-center backdrop-blur-md">
+        <div class="text-xs text-gray-400">Disponibles</div>
+        <div class="text-sm font-black text-purple-400" id="statDisp">10,000</div>
       </div>
     </div>
-  </header>
 
-  <main class="px-3 pt-4 pb-36">
-    <button onclick="openVerifyModal()" class="btn-verify py-3 text-sm mb-4">
-       Verificar el estado de mis boletos
-    </button>
     <div id="ticketSection"></div>
-    
     <div class="flex gap-2 mb-3">
       <input type="text" id="searchInput"
         class="search-input flex-1 px-3 py-2.5 text-sm"
-        placeholder=" Buscar n�mero..." maxlength="4" inputmode="numeric" />
-      <button onclick="randomSelect()" class="btn-teal px-5 py-2.5 text-sm whitespace-nowrap">
-         Azar
-      </button>
-    </div>
-
-    <div class="flex items-center justify-between gap-1 mb-4 p-3" style="background:rgba(255,255,255,.04); border:1px solid rgba(255,255,255,.08); border-radius:14px;">
-      <span class="text-xs text-gray-400 font-bold pl-2">Selecci�n R�pida:</span>
-      <div class="text-center min-w-[40px]">
-        <div class="font-black text-xl text-orange-400 leading-none">30</div>
-        <div class="text-[9px] text-gray-500 leading-none mt-1">boletos</div>
-      </div>
-      <button onclick="randomSelect()" class="btn-primary px-5 py-2 text-sm whitespace-nowrap" style="border-radius:10px;">
-         Elegir al Azar
+        placeholder="🔍 Buscar número..." maxlength="4" inputmode="numeric" />
+      <button onclick="randomSelect()" class="btn-teal px-4 py-2.5 text-sm whitespace-nowrap">
+        🎲 20 al Azar
       </button>
     </div>
 
     <div class="flex gap-4 mb-3 flex-wrap">
       <div class="flex items-center gap-1.5">
-        <div style="width:14px;height:14px;border-radius:4px;flex-shrink:0;background:rgba(255,255,255,.06);border:1.5px solid rgba(255,255,255,.12);"></div>
+        <div style="width:14px;height:14px;border-radius:4px;flex-shrink:0;
+          background:rgba(255,255,255,.06);border:1.5px solid rgba(255,255,255,.12);"></div>
         <span class="text-xs text-gray-400">Disponible</span>
       </div>
       <div class="flex items-center gap-1.5">
-        <div style="width:14px;height:14px;border-radius:4px;flex-shrink:0;background:linear-gradient(135deg,#A16207,#F97316);"></div>
+        <div style="width:14px;height:14px;border-radius:4px;flex-shrink:0;
+          background:linear-gradient(135deg,#7C3AED,#0EA5E9);"></div>
         <span class="text-xs text-gray-400">Seleccionado</span>
       </div>
     </div>
 
     <div class="flex items-center justify-between mb-3">
-      <button id="btnPrev" class="page-btn" onclick="changePage(-1)"> Ant.</button>
+      <button id="btnPrev" class="page-btn" onclick="changePage(-1)">← Ant.</button>
       <div class="text-center">
-        <div class="text-xs text-gray-400">P�gina</div>
+        <div class="text-xs text-gray-400">Página</div>
         <div class="font-black text-sm" id="pageIndicator">1 / 20</div>
       </div>
-      <button id="btnNext" class="page-btn" onclick="changePage(1)">Sig. </button>
+      <button id="btnNext" class="page-btn" onclick="changePage(1)">Sig. →</button>
     </div>
 
     <div id="ticketGrid" class="ticket-grid mb-3"></div>
 
     <div class="flex gap-2 mt-3 items-center">
-      <span class="text-xs text-gray-400 whitespace-nowrap">Ir a p�g:</span>
+      <span class="text-xs text-gray-400 whitespace-nowrap">Ir a pág:</span>
       <input type="number" id="pageJump" min="1" max="20"
         class="search-input px-3 py-2 text-sm w-24" inputmode="numeric" placeholder="1-20" />
       <button onclick="jumpToPage()" class="btn-outline px-4 py-2 text-sm">Ir</button>
     </div>
+
   </main>
 
-  <div class="floating-bar px-4 py-3" id="floatingBar">
+  <div class="floating-bar px-4 py-3" id="mainFloatingBar" style="display:none;">
     <div class="flex items-center gap-3 mb-2">
       <div class="flex-1">
         <div class="flex justify-between text-xs mb-1">
           <span class="text-gray-400">Seleccionados</span>
-          <span class="font-black" id="countLabel">0 / 30</span>
+          <span class="font-black" id="countLabel">0 / <span id="minLabel">20</span></span>
         </div>
         <div class="h-2 bg-white/10 rounded-full overflow-hidden">
           <div id="progressBar" class="h-full rounded-full transition-all duration-300"
-            style="width:0%;background:linear-gradient(90deg,#EAB308,#F97316)"></div>
+            style="width:0%;background:linear-gradient(90deg,#7C3AED,#0EA5E9)"></div>
         </div>
       </div>
       <div class="text-right">
         <div class="text-xs text-gray-400">Total</div>
-        <div class="font-black text-orange-400" id="totalPrice">GRATIS</div>
+        <div class="font-black text-teal-400" id="totalPrice">Bs. 0</div>
       </div>
     </div>
     <div class="flex gap-2">
-      <button onclick="clearSelection()" class="btn-outline flex-1 py-2.5 text-sm"> Limpiar</button>
+      <button onclick="clearSelection()" class="btn-outline flex-1 py-2.5 text-sm">🗑️ Limpiar</button>
       <button onclick="openPayModal()" id="btnPagar"
-        class="btn-primary flex-1 py-2.5 text-sm"> Proceder</button>
+        class="btn-primary flex-1 py-2.5 text-sm" disabled style="opacity:.4">
+        💳 Pagar
+      </button>
     </div>
   </div>
-</div>
 
-<a href="https://wa.me/584123400994" target="_blank" class="wa-support" title="Soporte">
+</div><a href="https://wa.me/584123400994" target="_blank" class="wa-support" title="Soporte">
   <svg viewBox="0 0 24 24" width="28" height="28" fill="#fff">
     <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/>
   </svg>
 </a>
 
+
 <div id="termsModal" class="modal-center" style="display:none">
   <div class="modal-card p-5">
     <div class="text-center mb-4">
-      <div class="text-4xl mb-2"></div>
-      <h2 class="text-xl font-black">T�rminos y Condiciones</h2>
-      <p class="text-xs text-gray-400 mt-1">RIFA GRATIS M � Debes aceptar para continuar</p>
+      <div class="text-4xl mb-2">📋</div>
+      <h2 class="text-xl font-black">Términos y Condiciones</h2>
+      <p class="text-xs text-gray-400 mt-1">RIFAS EL MENOR — Debes aceptar para continuar</p>
     </div>
     <div class="mb-5">
-      <div class="terms-item"><span class="terms-icon"></span><div><div class="text-sm font-bold text-orange-300">1. Identificaci�n de la Plataforma</div><div class="text-xs text-gray-400 mt-1">La plataforma Rifa Gratis M es la entidad responsable de la organizaci�n de los sorteos publicados.</div></div></div>
-      <div class="terms-item"><span class="terms-icon"></span><div><div class="text-sm font-bold text-orange-300">2. Requisitos de Participaci�n</div><div class="text-xs text-gray-400 mt-1">�nicamente podr�n participar personas mayores de 18 a�os.</div></div></div>
-      <div class="terms-item"><span class="terms-icon"></span><div><div class="text-sm font-bold text-orange-300">3. Adquisici�n de Boletos</div><div class="text-xs text-gray-400 mt-1">La selecci�n debe ser obligatoriamente de 30 n�meros por persona.</div></div></div>
-      <div class="terms-item"><span class="terms-icon"></span><div><div class="text-sm font-bold text-orange-300">4. Derechos de Imagen</div><div class="text-xs text-gray-400 mt-1">Es condici�n OBLIGATORIA que los ganadores participen en la creaci�n de contenido audiovisual para dar fe de la transparencia del sorteo.</div></div></div>
+      <div class="terms-item">
+        <span class="terms-icon">🏢</span>
+        <div>
+          <div class="text-sm font-bold text-sky-300">1. Identificación de la Plataforma</div>
+          <div class="text-xs text-gray-400 mt-1">La plataforma Rifas El Menor es la entidad responsable de la organización, gestión y ejecución de los sorteos publicados.</div>
+        </div>
+      </div>
+      <div class="terms-item">
+        <span class="terms-icon">🔞</span>
+        <div>
+          <div class="text-sm font-bold text-sky-300">2. Requisitos de Participación</div>
+          <div class="text-xs text-gray-400 mt-1">Únicamente podrán participar personas mayores de 18 años.</div>
+        </div>
+      </div>
+      <div class="terms-item">
+        <span class="terms-icon">🎟️</span>
+        <div>
+          <div class="text-sm font-bold text-sky-300">3. Adquisición y Métodos de Pago</div>
+          <div class="text-xs text-gray-400 mt-1">La compra mínima está preestablecida. El comprobante será enviado en un lapso no mayor a 12 horas tras confirmarse el pago.</div>
+        </div>
+      </div>
     </div>
-    <button onclick="acceptTerms()" style="width:100%;padding:15px;border:none;border-radius:16px;cursor:pointer;font-family:'Nunito',sans-serif;font-weight:900;font-size:15px;color:#000;background:linear-gradient(135deg,#A16207 0%,#EAB308 40%,#F97316 100%);box-shadow:0 4px 24px rgba(234,179,8,.5);">
-       He le�do y acepto los T�rminos � �Participar!
+    <button onclick="document.getElementById('mainTicketSection').style.display='block'; document.getElementById('mainFloatingBar').style.display='block'; acceptTerms();"
+      style="width:100%;padding:15px;border:none;border-radius:16px;cursor:pointer;
+        font-family:'Nunito',sans-serif;font-weight:900;font-size:15px;letter-spacing:.03em;color:#fff;
+        background:linear-gradient(135deg,#22D3EE 0%,#60A5FA 40%,#7C3AED 100%);
+        box-shadow:0 4px 24px rgba(96,165,250,.5);">
+      ✅ He leído y acepto los Términos — ¡Participar!
     </button>
+  </div>
+</div>
+
+<div id="topTenModal" class="modal-overlay" style="display:none; z-index: 500;">
+  <div class="modal-sheet p-5 bg-[#1A1035]">
+    <div class="w-10 h-1 bg-white/20 rounded-full mx-auto mb-4"></div>
+    <div class="text-center mb-4">
+       <h2 class="text-2xl font-black mb-1 text-[#EAB308]">🏆 TOP COMPRADORES</h2>
+       <p class="text-xs text-gray-400 font-bold tracking-widest uppercase" id="topTenSubtitle">Sorteo Activo</p>
+    </div>
+    <div id="topTenList" class="space-y-2 mb-4 max-h-[50vh] overflow-y-auto hide-scrollbar">
+       </div>
+    <button onclick="document.getElementById('topTenModal').style.display='none'" class="btn-outline w-full py-3 text-sm">Cerrar Tabla de Posiciones</button>
   </div>
 </div>
 
 <div id="verifyModal" class="modal-overlay" style="display:none">
   <div class="modal-sheet p-5">
     <div class="w-10 h-1 bg-white/20 rounded-full mx-auto mb-4"></div>
-    <h2 class="text-xl font-black mb-1"> Verificar mis boletos</h2>
-    <p class="text-sm text-gray-400 mb-4">Ingresa tu c�dula tal como la registraste al comprar</p>
+    <h2 class="text-xl font-black mb-1">🔍 Verificar mis boletos</h2>
+    <p class="text-sm text-gray-400 mb-4">Ingresa tu cédula tal como la registraste al comprar</p>
     <div class="flex gap-2 mb-4">
-      <input id="verifyCedula" type="text" class="form-input px-3 py-3 text-sm flex-1" placeholder="Ej: V-12345678" autocomplete="off" onkeydown="if(event.key==='Enter') buscarMisBoletos()" />
-      <button onclick="buscarMisBoletos()" id="btnBuscarBoletos" class="btn-primary px-5 py-3 text-sm whitespace-nowrap">Buscar</button>
+      <input id="verifyCedula" type="text"
+        class="form-input px-3 py-3 text-sm flex-1"
+        placeholder="Ej: V-12345678" autocomplete="off"
+        onkeydown="if(event.key==='Enter') buscarMisBoletos()" />
+      <button onclick="buscarMisBoletos()" id="btnBuscarBoletos"
+        class="btn-primary px-5 py-3 text-sm whitespace-nowrap">Buscar</button>
     </div>
-    <div id="verifyResults" class="mb-2"></div>
-    <button onclick="closeVerifyModal()" class="btn-outline w-full py-3 text-sm mt-1"> Cerrar</button>
+    <div id="verifyResults" class="mb-2 max-h-[40vh] overflow-y-auto hide-scrollbar"></div>
+    <button onclick="closeVerifyModal()" class="btn-outline w-full py-3 text-sm mt-1">← Cerrar</button>
   </div>
 </div>
 
 <div id="payModal" class="modal-overlay" style="display:none">
   <div class="modal-sheet p-5">
     <div class="w-10 h-1 bg-white/20 rounded-full mx-auto mb-4"></div>
-    <h2 class="text-xl font-black mb-1">Confirmar Registro </h2>
-    <p class="text-sm text-gray-400 mb-4">Completa tus datos para asignar los n�meros</p>
+    <h2 class="text-xl font-black mb-1">Confirmar Compra 🎟️</h2>
+    <p class="text-sm text-gray-400 mb-4">Completa tus datos para reservar los números</p>
+
     <div class="mb-4">
-      <div class="text-xs font-bold text-yellow-300 mb-2">TUS N�MEROS SELECCIONADOS:</div>
-      <div id="selectedChips" class="flex flex-wrap gap-1.5"></div>
+      <div class="text-xs font-bold text-purple-300 mb-2">TUS NÚMEROS SELECCIONADOS:</div>
+      <div id="selectedChips" class="flex flex-wrap gap-1.5 max-h-[100px] overflow-y-auto hide-scrollbar"></div>
+    </div>
+
+    <div class="payment-box p-4 mb-4">
+      <div class="text-sm font-black text-teal-300 mb-2">💳 DATOS DE PAGO MÓVIL</div>
+      <div class="space-y-2 text-sm">
+        <div class="flex justify-between items-center">
+          <span class="text-gray-400">Banco:</span>
+          <span class="font-bold flex items-center gap-1">Banco de Venezuela (0102) <button class="copy-btn" onclick="copyText('0102','Banco copiado ✅')" title="Copiar">📋</button></span>
+        </div>
+        <div class="flex justify-between items-center">
+          <span class="text-gray-400">C.I:</span>
+          <span class="font-bold flex items-center gap-1">30.522.091 <button class="copy-btn" onclick="copyText('30522091','Cédula copiada ✅')" title="Copiar">📋</button></span>
+        </div>
+        <div class="flex justify-between items-center">
+          <span class="text-gray-400">Teléfono:</span>
+          <span class="font-bold flex items-center gap-1">0414-4708220 <button class="copy-btn" onclick="copyText('04144708220','Teléfono copiado ✅')" title="Copiar">📋</button></span>
+        </div>
+        <div class="border-t border-white/10 pt-2 mt-1 flex justify-between">
+          <span class="text-gray-400">Total a pagar:</span>
+          <span class="font-black text-xl text-teal-300" id="modalTotal">Bs. 0</span>
+        </div>
+      </div>
     </div>
 
     <form id="payForm" onsubmit="submitOrder(event)" class="space-y-3">
-      <div><label class="text-xs font-bold text-gray-300 block mb-1"> Nombre Completo *</label><input type="text" id="fNombre" class="form-input px-3 py-3 text-sm" placeholder="Ej: Juan P�rez" required /></div>
-      <div><label class="text-xs font-bold text-gray-300 block mb-1"> C�dula de Identidad *</label><input type="text" id="fCedula" class="form-input px-3 py-3 text-sm" placeholder="Ej: V-12345678" required inputmode="text" /></div>
-      <div><label class="text-xs font-bold text-gray-300 block mb-1"> WhatsApp *</label><input type="tel" id="fWhatsapp" class="form-input px-3 py-3 text-sm" placeholder="Ej: 04141234567" required inputmode="numeric" /></div>
-      
-      <input type="hidden" id="fRef" value="000000" />
-
       <div>
-        <label class="text-xs font-bold text-gray-300 block mb-1"> Foto de C�dula *</label>
-        <label class="upload-area p-4 flex flex-col items-center gap-2 block" for="fCapture"><div class="text-3xl" id="uploadIcon"></div><div class="text-sm text-gray-400 text-center" id="uploadText">Toca para subir la foto de tu c�dula</div><input type="file" id="fCapture" accept="image/*" class="hidden" onchange="previewCapture(this)" required /></label>
+        <label class="text-xs font-bold text-gray-300 block mb-1">👤 Nombre Completo *</label>
+        <input type="text" id="fNombre" class="form-input px-3 py-3 text-sm" placeholder="Ej: Juan Pérez" required />
+      </div>
+      <div>
+        <label class="text-xs font-bold text-gray-300 block mb-1">🪪 Cédula de Identidad *</label>
+        <input type="text" id="fCedula" class="form-input px-3 py-3 text-sm" placeholder="Ej: V-12345678" required inputmode="text" />
+      </div>
+      <div>
+        <label class="text-xs font-bold text-gray-300 block mb-1">📱 WhatsApp *</label>
+        <input type="tel" id="fWhatsapp" class="form-input px-3 py-3 text-sm" placeholder="Ej: 04141234567" required inputmode="numeric" />
+      </div>
+      <div>
+        <label class="text-xs font-bold text-gray-300 block mb-1">🔢 Últimos 6 dígitos del comprobante *</label>
+        <input type="text" id="fRef" class="form-input px-3 py-3 text-sm text-center font-black tracking-widest" placeholder="482901" required inputmode="numeric" maxlength="6" minlength="6" pattern="[0-9]{6}" title="Exactamente los últimos 6 dígitos" />
+      </div>
+      <div>
+        <label class="text-xs font-bold text-gray-300 block mb-1">📷 Capture Bancario *</label>
+        <label class="upload-area p-4 flex flex-col items-center gap-2 block" for="fCapture">
+          <div class="text-3xl" id="uploadIcon">📎</div>
+          <div class="text-sm text-gray-400 text-center" id="uploadText">Toca para subir la foto del comprobante</div>
+          <input type="file" id="fCapture" accept="image/*" class="hidden" onchange="previewCapture(this)" required />
+        </label>
         <img id="capturePreview" class="w-full mt-2 hidden max-h-40 object-cover rounded-xl" />
       </div>
-      <button type="submit" class="btn-primary w-full py-4 text-base mt-2"> Confirmar y Asignar</button>
-      <button type="button" onclick="closePayModal()" class="btn-outline w-full py-3 text-sm"> Volver a elegir</button>
+      <button type="submit" class="btn-primary w-full py-4 text-base mt-2">🚀 Confirmar y Reservar</button>
+      <button type="button" onclick="closePayModal()" class="btn-outline w-full py-3 text-sm">← Volver a elegir</button>
     </form>
   </div>
 </div>
 
 <div id="successModal" class="modal-overlay" style="display:none">
   <div class="modal-sheet p-6 text-center">
-    <div class="text-6xl mb-3"></div>
-    <h2 class="text-2xl font-black mb-1">�Registro Exitoso!</h2>
-    <p class="text-gray-400 text-sm mb-4">Tus n�meros han sido asignados y guardados en el sistema.</p>
+    <div class="text-6xl mb-3">🎉</div>
+    <h2 class="text-2xl font-black mb-1">¡Reserva Enviada!</h2>
+    <p class="text-gray-400 text-sm mb-4">Tu reserva fue registrada. El administrador confirmará tus números pronto.</p>
     <div class="payment-box p-4 mb-4 text-left">
-      <div class="text-xs font-bold text-yellow-300 mb-2">RESUMEN DE TU REGISTRO:</div>
+      <div class="text-xs font-bold text-teal-300 mb-2">RESUMEN DE TU PEDIDO:</div>
       <div id="successSummary"></div>
     </div>
-    <div style="background:linear-gradient(135deg,rgba(234,179,8,.14),rgba(249,115,22,.14)); border:1px solid rgba(234,179,8,.3);border-radius:16px;padding:16px 14px;" class="mb-4">
-      <div class="text-sm font-black text-yellow-300 mb-3"> Redirigi�ndote a la Comunidad VIP...</div>
+    <div style="background:linear-gradient(135deg,rgba(20,184,166,.14),rgba(124,58,237,.14)); border:1px solid rgba(20,184,166,.3);border-radius:16px;padding:16px 14px;" class="mb-4">
+      <div class="text-sm font-black text-teal-300 mb-3">🎖️ Redirigiéndote a la Comunidad VIP...</div>
       <div class="cd-ring" id="cdRing" style="--pct:100%"><div class="cd-inner" id="cdNum">3</div></div>
-      <div class="text-xs text-gray-400 mt-1">Acceso exclusivo al grupo de WhatsApp </div>
+      <div class="text-xs text-gray-400 mt-1">Acceso exclusivo al grupo de WhatsApp 🏆</div>
     </div>
-    <button onclick="goVIP()" class="btn-teal w-full py-3 text-sm mb-2"> Ir ahora a la Comunidad VIP</button>
-    <button onclick="closeSuccessModal()" class="btn-outline w-full py-3 text-sm"> Cerrar</button>
+    <button onclick="goVIP()" class="btn-teal w-full py-3 text-sm mb-2">📲 Ir ahora a la Comunidad VIP</button>
+    <button onclick="closeSuccessModal()" class="btn-outline w-full py-3 text-sm">✅ Cerrar</button>
   </div>
 </div>
+
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="config.js"></script>
 <script src="app.js"></script>
+
+<script>
+  // =========================================================================
+  // TRUCO SENIOR: Controlamos el flujo de app.js sin editar su código.
+  // =========================================================================
+  
+  let isManualClick = false;
+  const originalOpenTerms = window.openTermsModal; 
+
+  // Silenciamos el popup automático de app.js. Solo obedece si damos click manual.
+  window.openTermsModal = function() {
+      if(isManualClick && originalOpenTerms) {
+          originalOpenTerms();
+      }
+  };
+
+  function comenzarCompra() {
+      isManualClick = true;
+      window.openTermsModal();
+      isManualClick = false;
+  }
+
+  // =========================================================================
+  // LÓGICA DEL CARRUSEL Y TOP 10 DE COMPRAS
+  // =========================================================================
+  window.historialData = [];
+
+  document.addEventListener('DOMContentLoaded', async () => {
+      
+      // 1. CARGAMOS LA RIFA ACTIVA EN EL CARRUSEL
+      const { data: config } = await db.from('landing_config').select('*').eq('id','main').maybeSingle();
+      if(config) {
+          if(config.flyer_url) document.getElementById('activeFlyerImg').src = config.flyer_url;
+          if(config.mensaje) document.getElementById('activeMsgText').textContent = config.mensaje;
+      }
+
+      // 2. CARGAMOS EL HISTORIAL DE RIFAS (SALÓN DE LA FAMA)
+      const { data: historial } = await db.from('historial_rifas').select('*').order('fecha_cierre', { ascending: false }).limit(3);
+      
+      if(historial && historial.length > 0) {
+          window.historialData = historial;
+          const carousel = document.getElementById('mainCarousel');
+          
+          historial.forEach(h => {
+              const flyer = h.flyer_url || 'https://via.placeholder.com/600x800?text=Sorteo+Finalizado';
+              const fecha = new Date(h.fecha_cierre).toLocaleDateString('es-VE');
+              
+              const slideHtml = `
+              <div class="min-w-full snap-center relative">
+                <img src="${flyer}" class="w-full aspect-[4/5] object-cover grayscale-[40%] opacity-80">
+                <div class="absolute inset-0 bg-gradient-to-t from-black via-black/70 to-transparent flex flex-col justify-end p-4 pb-6">
+                  <div class="bg-red-500/80 text-white text-[10px] font-black px-2 py-1 rounded-md inline-block self-start mb-2 uppercase tracking-widest border border-red-400">FINALIZADO • ${fecha}</div>
+                  
+                  <div class="bg-white/10 backdrop-blur-md border border-white/20 p-4 rounded-xl mb-4 shadow-lg">
+                    <div class="text-xs text-gray-300 mb-1 font-bold">Ganador del Sorteo:</div>
+                    <div class="flex justify-between items-center">
+                      <span class="text-xl font-black text-yellow-400">🎟️ ${h.ganador_numero}</span>
+                      <span class="text-sm font-bold text-white truncate max-w-[150px]">${h.ganador_nombre}</span>
+                    </div>
+                  </div>
+
+                  <div class="grid grid-cols-2 gap-2">
+                    <button onclick="openVerifyModal()" class="bg-white/10 border border-white/20 text-white font-bold py-3 rounded-xl text-sm backdrop-blur-sm shadow-lg transform transition active:scale-95">🔍 Consultar Cédula</button>
+                    <button onclick="abrirTopTenHistorial('${h.id}')" class="bg-yellow-500/20 border border-yellow-500/50 text-yellow-400 font-bold py-3 rounded-xl text-sm backdrop-blur-sm shadow-lg transform transition active:scale-95">🏆 Top Compras</button>
+                  </div>
+                </div>
+              </div>`;
+              carousel.insertAdjacentHTML('beforeend', slideHtml);
+          });
+          
+          // Activamos los botones del carrusel porque sí hay historial
+          document.getElementById('btnCarPrev').classList.remove('hidden');
+          document.getElementById('btnCarNext').classList.remove('hidden');
+      }
+  });
+
+  function scrollCarousel(dir) {
+      const container = document.getElementById('mainCarousel');
+      const scrollAmount = container.clientWidth;
+      container.scrollBy({ left: dir * scrollAmount, behavior: 'smooth' });
+  }
+
+  // =========================================================================
+  // CALCULO DE TOP 10 (EN VIVO E HISTÓRICO)
+  // =========================================================================
+  
+  async function abrirTopTenLive() {
+     document.getElementById('topTenSubtitle').textContent = 'Analizando compras actuales...';
+     document.getElementById('topTenList').innerHTML = '<div class="text-center py-6 text-2xl">⏳</div>';
+     document.getElementById('topTenModal').style.display = 'flex';
+     document.body.style.overflow = 'hidden';
+     
+     try {
+         const { data, error } = await db.from('pedidos').select('nombre, cedula, numeros').eq('estado', 'aprobado');
+         if(error) throw error;
+         
+         let conteo = {};
+         (data || []).forEach(p => {
+             if(!conteo[p.cedula]) conteo[p.cedula] = { nombre: p.nombre, cantidad: 0 };
+             conteo[p.cedula].cantidad += (p.numeros ? p.numeros.length : 0);
+         });
+         
+         let top10 = Object.values(conteo).sort((a,b) => b.cantidad - a.cantidad).slice(0, 10);
+         renderTopTen(top10, '🏆 SORTEO ACTIVO');
+     } catch(e) {
+         document.getElementById('topTenList').innerHTML = '<div class="text-center text-red-400 font-bold py-4">❌ Error de conexión al cargar datos</div>';
+     }
+  }
+
+  function abrirTopTenHistorial(id) {
+      document.getElementById('topTenList').innerHTML = '<div class="text-center py-6 text-2xl">⏳</div>';
+      document.getElementById('topTenModal').style.display = 'flex';
+      document.body.style.overflow = 'hidden';
+      
+      const h = window.historialData.find(x => x.id === id);
+      if(h && h.top_compradores) {
+          renderTopTen(h.top_compradores, '📜 SORTEO FINALIZADO');
+      } else {
+          renderTopTen([], '📜 SORTEO FINALIZADO');
+      }
+  }
+
+  function renderTopTen(lista, subtitulo) {
+      document.getElementById('topTenSubtitle').textContent = subtitulo;
+      const listDiv = document.getElementById('topTenList');
+      if(!lista || lista.length === 0) {
+          listDiv.innerHTML = '<div class="text-center text-gray-400 py-6 font-bold">Aún no hay compradores registrados.<br>¡Sé el primero en la lista!</div>';
+          return;
+      }
+      
+      let html = '';
+      lista.forEach((item, index) => {
+          let medalla = '';
+          let bgClass = 'bg-white/5 border-white/10';
+          if(index === 0) { medalla = '🥇'; bgClass = 'bg-yellow-500/20 border-yellow-500/50 shadow-[0_0_15px_rgba(234,179,8,0.2)]'; }
+          else if(index === 1) { medalla = '🥈'; bgClass = 'bg-gray-300/20 border-gray-300/50'; }
+          else if(index === 2) { medalla = '🥉'; bgClass = 'bg-amber-700/20 border-amber-700/50'; }
+          else { medalla = `<span class="text-gray-500 font-black text-sm w-full text-center block">#${index+1}</span>`; }
+          
+          html += `
+          <div class="flex items-center justify-between border p-3 rounded-xl mb-2 ${bgClass}">
+             <div class="flex items-center gap-3">
+                <div class="w-8 flex justify-center items-center text-2xl">${medalla}</div>
+                <div class="font-bold text-sm text-white">${item.nombre.substring(0,20)}</div>
+             </div>
+             <div class="text-xs font-black bg-purple-600/30 text-purple-300 px-3 py-1.5 rounded-lg border border-purple-500/30 whitespace-nowrap">
+                ${item.cantidad} tickets
+             </div>
+          </div>`;
+      });
+      listDiv.innerHTML = html;
+  }
+</script>
 </body>
 </html>
