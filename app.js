@@ -7,7 +7,8 @@ let PRECIO_BOLETO      = 5;
 let MINIMO_BOLETOS     = 20;     
 const TOTAL_BOLETOS      = 10000;  
 const BOLETOS_POR_PAGINA = 500;
-const VIP_URL = 'https://chat.whatsapp.com/ChkSensk7jPHY5qS8e2VRM?mode=gi_t';
+// NUEVO ENLACE DE LA COMUNIDAD VIP:
+const VIP_URL = 'https://chat.whatsapp.com/CT7Vkzgt81ZCrXsdbLLp3T?mode=gi_t';
 
 let ticketStates    = new Map();
 let availableList   = [];
