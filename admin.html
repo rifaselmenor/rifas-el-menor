@@ -281,12 +281,24 @@
       <div class="text-center py-8 text-gray-500">⏳ Cargando pedidos...</div>
     </div>
 
-    <div class="px-4 py-6">
-      <div class="danger-zone p-4">
-        <div class="text-xs font-black text-red-400 mb-1 tracking-widest">⚠️ ZONA DE PELIGRO</div>
-        <p class="text-xs text-gray-400 mb-4">Archiva la Rifa actual (guarda el top de compras y el ganador) y limpia la base de datos para una nueva jornada.</p>
-        <button onclick="reiniciarRifa()" class="btn-reset w-full py-4 text-base">🚨 Cerrar y Archivar Rifa</button>
+    <div class="px-4 py-6 space-y-4">
+      
+      <div style="background:rgba(234,179,8,0.1); border:1px solid rgba(234,179,8,0.3); border-radius:18px; padding:16px;">
+        <div class="text-xs font-black text-yellow-400 mb-1 tracking-widest">⚠️ CIERRE DE RIFA (RECOMENDADO)</div>
+        <p class="text-xs text-gray-400 mb-4">Archiva la jornada actual, guarda el ganador en el carrusel y vacía los números para el siguiente sorteo.</p>
+        <button onclick="reiniciarRifa()" style="background:linear-gradient(135deg,#ca8a04,#eab308); color:#000; font-weight:900; border:none; border-radius:12px; padding:14px; width:100%; box-shadow:0 4px 15px rgba(234,179,8,0.2); transition: transform 0.15s;">
+          📦 Cerrar y Archivar Sorteo
+        </button>
       </div>
+
+      <div style="background:rgba(239,68,68,0.05); border:1px dashed rgba(239,68,68,0.3); border-radius:16px; padding:14px;">
+        <div class="text-[10px] font-black text-red-500 mb-1 tracking-widest">☢️ ZONA NUCLEAR</div>
+        <p class="text-[11px] text-gray-500 mb-3">Borra TODO de la base de datos (Historial, clientes y boletos). Deja el sistema en cero absoluto.</p>
+        <button onclick="formatearSistemaCompleto()" style="background:transparent; color:#ef4444; font-weight:800; font-size:12px; border:1px solid rgba(239,68,68,0.5); border-radius:8px; padding:8px; width:100%; transition: all 0.15s;">
+          💥 Formatear Sistema Completo
+        </button>
+      </div>
+
     </div>
 
   </div>
@@ -639,6 +651,36 @@ async function saveLandingContent() {
     showToast('✅ Guardado', 2500);
     toggleLandingPanel();
   } catch(err) { showToast('❌ Error', 3500); }
+}
+
+// =========================================================
+// BOTÓN NUCLEAR (BORRADO TOTAL)
+// =========================================================
+async function formatearSistemaCompleto() {
+  const ok1 = confirm('☢️ ADVERTENCIA EXTREMA ☢️\n\n¿Seguro que quieres BORRAR TODA LA BASE DE DATOS?\nEsto destruirá:\n- Tu carrusel y ganadores.\n- Tus clientes y ventas.\n\nESTO NO SE PUEDE DESHACER.');
+  if (!ok1) return;
+
+  const pass = prompt('🔑 CONTRASEÑA NUCLEAR REQUERIDA:\n\nPara confirmar la destrucción total, escribe exactamente:\nKLEYBERTH');
+  
+  if (pass !== 'KLEYBERTH') {
+    alert('❌ Contraseña incorrecta. Operación cancelada por seguridad.');
+    return;
+  }
+
+  showToast('☢️ Formateando sistema... No cierres esta ventana', 6000);
+
+  try {
+    // Destruye todas las tablas
+    await db.from('historial_rifas').delete().not('id', 'is', null);
+    await db.from('tickets').delete().gte('numero', 0);
+    await db.from('pedidos').delete().not('id', 'is', null);
+
+    alert('✅ SISTEMA FORMATEADO.\nLa base de datos quedó en cero absoluto.');
+    location.reload();
+  } catch(err) {
+    console.error(err);
+    alert('❌ Error al formatear. Revisa tu conexión.');
+  }
 }
 
 function showToast(msg, duration = 2500) {
