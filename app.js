@@ -23,6 +23,40 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   configurarBotonesDinamicos();
 
+  // 🛡️ ESCUDO ANTI-FRAUDE (BOTÓN DE PÁNICO)
+  try {
+    const { data: configData } = await db.from('landing_config').select('ventas_activas').eq('id', 'main').single();
+    
+    if (configData && configData.ventas_activas === false) {
+      
+      // 1. Reemplazamos toda la sección de compra por un cartel de cerrado
+      const mainSection = document.getElementById('mainTicketSection');
+      if (mainSection) {
+        mainSection.innerHTML = `
+          <div style="text-align:center;padding:50px 20px;background:rgba(239,68,68,0.15);border:2px dashed #ef4444;border-radius:16px;margin:20px 0;box-shadow:0 0 30px rgba(239,68,68,0.2);">
+            <div class="animate-pulse" style="font-size:60px; margin-bottom:15px;">🛑</div>
+            <h2 style="color:#ef4444;font-size:28px;font-weight:900;margin-bottom:10px;text-transform:uppercase;letter-spacing:1px;">Plataforma Cerrada</h2>
+            <p style="color:#fca5a5;font-size:15px;font-weight:700;">Estamos esperando los resultados de Súper Gana.<br>¡Mucha suerte a todos los participantes!</p>
+          </div>
+        `;
+      }
+      
+      // 2. Apagamos y bloqueamos los botones de entrada del carrusel
+      const buyButtons = document.querySelectorAll('button[onclick="comenzarCompra()"]');
+      buyButtons.forEach(btn => {
+        btn.textContent = '🛑 PLATAFORMA CERRADA';
+        btn.style.background = 'linear-gradient(135deg, #7f1d1d, #ef4444)';
+        btn.onclick = null; // Quita la acción de abrir los números
+        btn.style.pointerEvents = 'none'; // Prohíbe el clic
+      });
+
+      // 3. Cortamos la ejecución aquí (Nadie puede cargar ni enviar boletos)
+      return; 
+    }
+  } catch (e) {
+    console.error('Error leyendo botón de pánico', e);
+  }
+
   showToast('⏳ Cargando boletos...');
   await loadTickets(); 
   renderGrid();
