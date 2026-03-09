@@ -2,8 +2,9 @@
 // ║      RIFAS EL MENOR — app.js (PAGA - 20 MIN - SÉNIOR)        ║
 // ╚══════════════════════════════════════════════════════════════╝
 
-const PRECIO_BOLETO      = 5;      
-const MINIMO_BOLETOS     = 20;     
+// 1. Cambiamos de 'const' a 'let' para que los valores puedan actualizarse
+let PRECIO_BOLETO      = 5;      
+let MINIMO_BOLETOS     = 20;     
 const TOTAL_BOLETOS      = 10000;  
 const BOLETOS_POR_PAGINA = 500;
 const VIP_URL = 'https://chat.whatsapp.com/ChkSensk7jPHY5qS8e2VRM?mode=gi_t';
@@ -17,45 +18,55 @@ let cdInterval      = null;
 let cantidadAzar    = MINIMO_BOLETOS;
 
 document.addEventListener('DOMContentLoaded', async () => {
-  document.getElementById('statPrecio').textContent = PRECIO_BOLETO;
-  document.getElementById('statMin').textContent    = MINIMO_BOLETOS;
-  document.getElementById('minLabel').textContent   = MINIMO_BOLETOS;
 
-  configurarBotonesDinamicos();
-
-  // 🛡️ ESCUDO ANTI-FRAUDE (BOTÓN DE PÁNICO)
+  // 2. VAMOS A SUPABASE A LEER EL ESTADO Y LOS PRECIOS NUEVOS
   try {
-    const { data: configData } = await db.from('landing_config').select('ventas_activas').eq('id', 'main').single();
+    // select('*') para traer tanto el botón de pánico como los precios
+    const { data: configData } = await db.from('landing_config').select('*').eq('id', 'main').single();
     
-    if (configData && configData.ventas_activas === false) {
+    if (configData) {
       
-      // 1. Reemplazamos toda la sección de compra por un cartel de cerrado
-      const mainSection = document.getElementById('mainTicketSection');
-      if (mainSection) {
-        mainSection.innerHTML = `
-          <div style="text-align:center;padding:50px 20px;background:rgba(239,68,68,0.15);border:2px dashed #ef4444;border-radius:16px;margin:20px 0;box-shadow:0 0 30px rgba(239,68,68,0.2);">
-            <div class="animate-pulse" style="font-size:60px; margin-bottom:15px;">🛑</div>
-            <h2 style="color:#ef4444;font-size:28px;font-weight:900;margin-bottom:10px;text-transform:uppercase;letter-spacing:1px;">Plataforma Cerrada</h2>
-            <p style="color:#fca5a5;font-size:15px;font-weight:700;">Estamos esperando los resultados de Súper Gana.<br>¡Mucha suerte a todos los participantes!</p>
-          </div>
-        `;
+      // 🛡️ ESCUDO ANTI-FRAUDE (BOTÓN DE PÁNICO)
+      if (configData.ventas_activas === false) {
+        const mainSection = document.getElementById('mainTicketSection');
+        if (mainSection) {
+          mainSection.innerHTML = `
+            <div style="text-align:center;padding:50px 20px;background:rgba(239,68,68,0.15);border:2px dashed #ef4444;border-radius:16px;margin:20px 0;box-shadow:0 0 30px rgba(239,68,68,0.2);">
+              <div class="animate-pulse" style="font-size:60px; margin-bottom:15px;">🛑</div>
+              <h2 style="color:#ef4444;font-size:28px;font-weight:900;margin-bottom:10px;text-transform:uppercase;letter-spacing:1px;">Plataforma Cerrada</h2>
+              <p style="color:#fca5a5;font-size:15px;font-weight:700;">Estamos esperando los resultados de Súper Gana.<br>¡Mucha suerte a todos los participantes!</p>
+            </div>
+          `;
+        }
+        const buyButtons = document.querySelectorAll('button[onclick="comenzarCompra()"]');
+        buyButtons.forEach(btn => {
+          btn.textContent = '🛑 PLATAFORMA CERRADA';
+          btn.style.background = 'linear-gradient(135deg, #7f1d1d, #ef4444)';
+          btn.onclick = null; 
+          btn.style.pointerEvents = 'none'; 
+        });
+        return; // Cortamos la ejecución aquí
       }
-      
-      // 2. Apagamos y bloqueamos los botones de entrada del carrusel
-      const buyButtons = document.querySelectorAll('button[onclick="comenzarCompra()"]');
-      buyButtons.forEach(btn => {
-        btn.textContent = '🛑 PLATAFORMA CERRADA';
-        btn.style.background = 'linear-gradient(135deg, #7f1d1d, #ef4444)';
-        btn.onclick = null; // Quita la acción de abrir los números
-        btn.style.pointerEvents = 'none'; // Prohíbe el clic
-      });
 
-      // 3. Cortamos la ejecución aquí (Nadie puede cargar ni enviar boletos)
-      return; 
+      // 💰 ACTUALIZAMOS LOS VALORES SEGÚN EL ADMIN
+      if (configData.precio_boleto) {
+        PRECIO_BOLETO = parseFloat(configData.precio_boleto);
+      }
+      if (configData.minimo_boletos) {
+        MINIMO_BOLETOS = parseInt(configData.minimo_boletos, 10);
+        cantidadAzar = MINIMO_BOLETOS; // Emparejamos la selección al azar
+      }
     }
   } catch (e) {
-    console.error('Error leyendo botón de pánico', e);
+    console.error('Error leyendo configuración de Supabase', e);
   }
+
+  // 3. AHORA SÍ: PINTAMOS LOS NÚMEROS (ACTUALIZADOS) EN LA PANTALLA
+  if (document.getElementById('statPrecio')) document.getElementById('statPrecio').textContent = PRECIO_BOLETO;
+  if (document.getElementById('statMin')) document.getElementById('statMin').textContent = MINIMO_BOLETOS;
+  if (document.getElementById('minLabel')) document.getElementById('minLabel').textContent = MINIMO_BOLETOS;
+
+  configurarBotonesDinamicos();
 
   showToast('⏳ Cargando boletos...');
   await loadTickets(); 
@@ -402,7 +413,6 @@ async function submitOrder(e) {
        if(idx !== -1) availableList.splice(idx, 1);
     });
     
-    // Recalculamos paginas si es necesario y refrescamos barra
     totalPages = Math.max(1, Math.ceil(availableList.length / BOLETOS_POR_PAGINA));
     if(currentPage > totalPages) currentPage = 1;
     
@@ -457,12 +467,10 @@ if (searchInput) {
   searchInput.addEventListener('input', (e) => {
     let val = e.target.value;
     if (val.length === 4) {
-      // Como ahora los numeros "desaparecen", si buscan un numero que ya no esta en availableList, hay que avisarles.
       if(!availableList.includes(val)) {
          showToast('Ese número ya no está disponible');
          return;
       }
-      
       let tickets = document.querySelectorAll('.ticket');
       tickets.forEach(tk => {
         if (tk.textContent === val) {
