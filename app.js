@@ -2,16 +2,16 @@
 // ║      RIFAS EL MENOR — app.js (PAGA - 20 MIN - SÉNIOR)        ║
 // ╚══════════════════════════════════════════════════════════════╝
 
-const PRECIO_BOLETO      = 5;      // Precio en Bs. por boleto
-const MINIMO_BOLETOS     = 20;     // Mínimo de boletos a comprar
-const TOTAL_BOLETOS      = 10000;  // 0000-9999
+const PRECIO_BOLETO      = 5;      
+const MINIMO_BOLETOS     = 20;     
+const TOTAL_BOLETOS      = 10000;  
 const BOLETOS_POR_PAGINA = 500;
 const VIP_URL = 'https://chat.whatsapp.com/ChkSensk7jPHY5qS8e2VRM?mode=gi_t';
 
 let ticketStates    = new Map();
 let availableList   = [];
 let currentPage     = 1;
-let totalPages      = Math.ceil(TOTAL_BOLETOS / BOLETOS_POR_PAGINA);
+let totalPages      = 1; // Se calculará dinámicamente
 let selectedTickets = new Set();
 let cdInterval      = null;
 let cantidadAzar    = MINIMO_BOLETOS;
@@ -54,11 +54,12 @@ function configurarBotonesDinamicos() {
 }
 
 async function loadTickets() {
+  // Inicializamos todos como disponibles primero
   for (let i = 0; i < TOTAL_BOLETOS; i++) {
     let numStr = i.toString().padStart(4, '0');
     ticketStates.set(numStr, 'available');
-    availableList.push(numStr);
   }
+  
   try {
     let desde = 0, hasta = 999, hayMasData = true;
     while (hayMasData) {
@@ -73,7 +74,43 @@ async function loadTickets() {
         else { desde += 1000; hasta += 1000; }
       } else hayMasData = false;
     }
+    
+    // Construir la availableList EXCLUYENDO los no-disponibles
+    availableList = [];
+    for (let i = 0; i < TOTAL_BOLETOS; i++) {
+      let numStr = i.toString().padStart(4, '0');
+      let estado = ticketStates.get(numStr);
+      // Solo metemos a la lista los que estén 100% libres
+      if (estado !== 'pendiente' && estado !== 'vendido') {
+         availableList.push(numStr);
+      }
+    }
+    
+    // Recalcular páginas en base a lo que quedó
+    totalPages = Math.max(1, Math.ceil(availableList.length / BOLETOS_POR_PAGINA));
+    if(currentPage > totalPages) currentPage = 1;
+    
+    updateSalesBar();
   } catch(e) { console.error("Error cargando tickets", e); }
+}
+
+function updateSalesBar() {
+  let vendidosOPendientes = TOTAL_BOLETOS - availableList.length;
+  
+  const pct = Math.min(Math.round((vendidosOPendientes / TOTAL_BOLETOS) * 100), 100);
+  
+  const fillEl = document.getElementById('salesFill');
+  const pctEl  = document.getElementById('salesPct');
+  const soldEl = document.getElementById('salesSold');
+  const remEl  = document.getElementById('salesRem');
+  
+  if (fillEl) fillEl.style.width = pct + '%';
+  if (pctEl) pctEl.textContent = pct + '%';
+  if (soldEl) soldEl.textContent = vendidosOPendientes;
+  if (remEl) remEl.textContent = availableList.length;
+  
+  const disp = document.getElementById('statDisp');
+  if (disp) disp.textContent = availableList.length;
 }
 
 function renderGrid() {
@@ -84,22 +121,15 @@ function renderGrid() {
   const start = (currentPage - 1) * BOLETOS_POR_PAGINA;
   const end = start + BOLETOS_POR_PAGINA;
 
-  for (let i = start; i < end && i < TOTAL_BOLETOS; i++) {
-    let numStr = i.toString().padStart(4, '0');
+  // Renderizamos SOLO los elementos de la availableList
+  for (let i = start; i < end && i < availableList.length; i++) {
+    let numStr = availableList[i];
     let t = document.createElement('div');
-    let estado = ticketStates.get(numStr);
-
-    if (estado === 'pendiente' || estado === 'vendido') {
-       t.className = 'ticket';
-       t.textContent = numStr;
-       t.style.opacity = '0.3';
-       t.style.cursor = 'not-allowed';
-       t.style.background = estado === 'vendido' ? 'rgba(239,68,68,0.2)' : 'rgba(234,179,8,0.2)';
-    } else {
-       t.className = 'ticket ' + (selectedTickets.has(numStr) ? 'ticket-selected' : 'ticket-available');
-       t.textContent = numStr;
-       t.onclick = () => toggleTicket(numStr);
-    }
+    
+    t.className = 'ticket ' + (selectedTickets.has(numStr) ? 'ticket-selected' : 'ticket-available');
+    t.textContent = numStr;
+    t.onclick = () => toggleTicket(numStr);
+    
     grid.appendChild(t);
   }
 
@@ -138,27 +168,28 @@ function jumpToPage() {
 
 function randomSelect() {
   selectedTickets.clear();
-  let disp = availableList.filter(t => ticketStates.get(t) === 'available');
 
-  if (disp.length < cantidadAzar) {
-    showToast(`❌ Solo quedan ${disp.length} boletos disponibles.`);
+  if (availableList.length < cantidadAzar) {
+    showToast(`❌ Solo quedan ${availableList.length} boletos disponibles.`);
     return;
   }
 
-  for (let i = disp.length - 1; i > 0; i--) {
+  let pool = [...availableList];
+  
+  for (let i = pool.length - 1; i > 0; i--) {
     const j = Math.floor(Math.random() * (i + 1));
-    [disp[i], disp[j]] = [disp[j], disp[i]];
+    [pool[i], pool[j]] = [pool[j], pool[i]];
   }
 
   for (let i = 0; i < cantidadAzar; i++) {
-    selectedTickets.add(disp[i]);
+    selectedTickets.add(pool[i]);
   }
 
   showToast(`🎲 ¡${cantidadAzar} boletos seleccionados al azar!`);
 
   let primerBoleto = Array.from(selectedTickets).sort()[0];
   if (primerBoleto) {
-    let indice = parseInt(primerBoleto);
+    let indice = availableList.indexOf(primerBoleto);
     currentPage = Math.floor(indice / BOLETOS_POR_PAGINA) + 1;
   }
 
@@ -257,9 +288,6 @@ function previewCapture(input) {
   }
 }
 
-// ─────────────────────────────────────────
-// CONEXIÓN CON SUPABASE AL GUARDAR (DIAGNÓSTICO SÉNIOR)
-// ─────────────────────────────────────────
 async function submitOrder(e) {
   e.preventDefault();
 
@@ -282,7 +310,6 @@ async function submitOrder(e) {
   const file = fileInput ? fileInput.files[0] : null;
 
   try {
-    // 1. Subir Capture a Supabase Storage
     let captureUrl = null;
     if (file) {
       const ext = file.name.split('.').pop();
@@ -301,7 +328,6 @@ async function submitOrder(e) {
       captureUrl = publicUrlData.publicUrl;
     }
 
-    // 2. Guardar Pedido en tabla 'pedidos'
     const { data: pedidoData, error: pedidoError } = await db
       .from('pedidos')
       .insert([{
@@ -309,7 +335,7 @@ async function submitOrder(e) {
         cedula: cedula,
         whatsapp: whatsapp,
         ref_comprobante: referencia,
-        numeros: boletosArray.map(Number), // Lo guardamos como números para el admin
+        numeros: boletosArray.map(Number), 
         total: totalPagado,
         capture_url: captureUrl,
         estado: 'pendiente'
@@ -322,7 +348,6 @@ async function submitOrder(e) {
       throw pedidoError;
     }
 
-    // 3. Reservar Tickets en tabla 'tickets'
     const ticketsToInsert = boletosArray.map(num => ({
       numero: parseInt(num, 10),
       estado: 'pendiente',
@@ -336,14 +361,24 @@ async function submitOrder(e) {
       throw ticketsError;
     }
 
-    // 4. Notificar a Telegram (Aislado)
+    // Actualizamos visualmente quitando los tickets de la lista disponible
+    boletosArray.forEach(n => {
+       ticketStates.set(n, 'pendiente');
+       let idx = availableList.indexOf(n);
+       if(idx !== -1) availableList.splice(idx, 1);
+    });
+    
+    // Recalculamos paginas si es necesario y refrescamos barra
+    totalPages = Math.max(1, Math.ceil(availableList.length / BOLETOS_POR_PAGINA));
+    if(currentPage > totalPages) currentPage = 1;
+    
+    updateSalesBar();
+    renderGrid();
+
     try {
       await notificarTelegram(nombre, boletosStr, totalPagado, referencia);
-    } catch (telErr) {
-      console.warn("Telegram falló, pero la DB está perfecta: ", telErr);
-    }
+    } catch (telErr) {}
 
-    // 5. Mostrar Éxito
     document.getElementById('payModal').style.display = 'none';
     
     const summary = document.getElementById('successSummary');
@@ -388,6 +423,12 @@ if (searchInput) {
   searchInput.addEventListener('input', (e) => {
     let val = e.target.value;
     if (val.length === 4) {
+      // Como ahora los numeros "desaparecen", si buscan un numero que ya no esta en availableList, hay que avisarles.
+      if(!availableList.includes(val)) {
+         showToast('Ese número ya no está disponible');
+         return;
+      }
+      
       let tickets = document.querySelectorAll('.ticket');
       tickets.forEach(tk => {
         if (tk.textContent === val) {
@@ -402,18 +443,39 @@ if (searchInput) {
 function openVerifyModal() { document.getElementById('verifyModal').style.display = 'flex'; }
 function closeVerifyModal() { document.getElementById('verifyModal').style.display = 'none'; document.getElementById('verifyResults').innerHTML=''; }
 
-function buscarMisBoletos() {
-    const input = document.getElementById('verifyCedula').value;
-    const res = document.getElementById('verifyResults');
-    if(input.length < 5) {
-        showToast('Ingresa una cédula válida');
-        return;
+async function buscarMisBoletos() {
+    const btn = document.getElementById('btnBuscarBoletos');
+    const cedula = document.getElementById('verifyCedula').value.trim();
+    const resultsDiv = document.getElementById('verifyResults');
+    if(cedula.length < 5) { alert('Ingresa una cédula válida'); return; }
+    
+    btn.textContent = '⏳'; btn.disabled = true; resultsDiv.innerHTML = '';
+    try {
+      const { data, error } = await db.from('pedidos').select('id,nombre,cedula,numeros,estado').ilike('cedula', '%' + cedula.replace(/^[VEJvej]-?/,'') + '%');
+      if (error) throw error;
+      if (!data || data.length === 0) {
+        resultsDiv.innerHTML = `<div style="background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.3);border-radius:14px;padding:16px;text-align:center;color:#FCA5A5;font-weight:700">❌ No se encontraron registros con esa cédula.</div>`;
+      } else {
+        let html = '';
+        data.forEach(p => {
+          let badge = '';
+          if(p.estado === 'aprobado') badge = '<span style="background:rgba(34,197,94,.2);color:#86EFAC;padding:2px 6px;border-radius:6px;font-size:11px">✅ Aprobado</span>';
+          else if (p.estado === 'pendiente') badge = '<span style="background:rgba(234,179,8,.2);color:#FDE68A;padding:2px 6px;border-radius:6px;font-size:11px">⏳ En Revisión</span>';
+          else badge = '<span style="background:rgba(239,68,68,.2);color:#FCA5A5;padding:2px 6px;border-radius:6px;font-size:11px">❌ Rechazado</span>';
+          
+          let numsFormat = Array.isArray(p.numeros) ? p.numeros.join(', ') : p.numeros;
+          html += `<div style="background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);border-radius:12px;padding:12px;margin-bottom:8px;font-size:13px;">
+                      <div class="flex justify-between mb-2"><strong>${p.nombre}</strong>${badge}</div>
+                      <div class="text-gray-400 text-xs mb-1">Boletos: <span class="text-white">${numsFormat}</span></div>
+                   </div>`;
+        });
+        resultsDiv.innerHTML = html;
+      }
+    } catch (err) {
+      resultsDiv.innerHTML = '<div style="background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.3);border-radius:14px;padding:16px;text-align:center;color:#FCA5A5;font-weight:700">❌ Error al consultar. Revisa tu conexión.</div>';
+    } finally {
+      btn.textContent = 'Buscar'; btn.disabled = false;
     }
-    res.innerHTML = `
-      <div style="background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.3);
-        border-radius:14px;padding:16px;text-align:center;color:#FCA5A5;font-weight:700">
-        ❌ No se encontraron reservas confirmadas.
-      </div>`;
 }
 
 function showToast(msg, duration = 2000) {
