@@ -223,7 +223,7 @@
           <div class="font-black text-purple-300" style="font-family:'Space Grotesk',sans-serif;">
             Editar Página Principal
           </div>
-          <div class="text-xs text-gray-400">Flyer y mensaje inicial</div>
+          <div class="text-xs text-gray-400">Configura tu sorteo actual</div>
         </div>
       </div>
       <div class="space-y-3">
@@ -242,7 +242,19 @@
           <label class="text-xs font-bold text-gray-300 block mb-1">📝 Mensaje</label>
           <textarea id="landingMsgInput" class="form-textarea" placeholder="Escribe tu mensaje aquí..."></textarea>
         </div>
-        <div class="flex gap-2">
+        
+        <div class="grid grid-cols-2 gap-3 mt-2">
+          <div>
+            <label class="text-xs font-bold text-gray-300 block mb-1">💰 Precio por ticket (Bs)</label>
+            <input type="number" id="precioInput" class="form-input" placeholder="Ej: 5" min="1" />
+          </div>
+          <div>
+            <label class="text-xs font-bold text-gray-300 block mb-1">🎟️ Mínimo de compra</label>
+            <input type="number" id="minimoInput" class="form-input" placeholder="Ej: 20" min="1" />
+          </div>
+        </div>
+
+        <div class="flex gap-2 mt-3">
           <button onclick="saveLandingContent()" style="flex:1;padding:12px;border:none;border-radius:12px;cursor:pointer;font-family:'Nunito',sans-serif;font-weight:900;font-size:14px;color:#fff;background:linear-gradient(135deg,#14B8A6,#0EA5E9);">💾 Guardar cambios</button>
           <button onclick="toggleLandingPanel()" style="padding:12px 16px;border:1.5px solid rgba(255,255,255,.2);border-radius:12px;background:transparent;color:var(--text-muted);font-weight:700;cursor:pointer;font-family:'Nunito',sans-serif;">Cancelar</button>
         </div>
@@ -620,6 +632,8 @@ async function loadLandingConfig() {
         document.getElementById('flyerPreview').src = data.flyer_url;
         document.getElementById('flyerPreview').style.display = 'block';
       }
+      if (data.precio_boleto) document.getElementById('precioInput').value = data.precio_boleto;
+      if (data.minimo_boletos) document.getElementById('minimoInput').value = data.minimo_boletos;
     }
   } catch(e) {}
 }
@@ -637,6 +651,9 @@ function previewFlyer(input) {
 
 async function saveLandingContent() {
   const mensaje = document.getElementById('landingMsgInput').value.trim();
+  const precioVal = document.getElementById('precioInput').value;
+  const minimoVal = document.getElementById('minimoInput').value;
+
   let flyerUrl  = null;
   try {
     if (flyerFile) {
@@ -645,8 +662,12 @@ async function saveLandingContent() {
       await db.storage.from('captures').upload(path, flyerFile, { contentType:flyerFile.type, upsert:true });
       flyerUrl = db.storage.from('captures').getPublicUrl(path).data.publicUrl;
     }
+    
     const payload = { id:'main', mensaje };
     if (flyerUrl) payload.flyer_url = flyerUrl;
+    if (precioVal) payload.precio_boleto = parseFloat(precioVal);
+    if (minimoVal) payload.minimo_boletos = parseInt(minimoVal, 10);
+
     await db.from('landing_config').upsert([payload], { onConflict:'id' });
     showToast('✅ Guardado', 2500);
     toggleLandingPanel();
