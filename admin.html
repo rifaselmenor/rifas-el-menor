@@ -253,6 +253,11 @@
             <input type="number" id="minimoInput" class="form-input" placeholder="Ej: 20" min="1" />
           </div>
         </div>
+        
+        <div class="mt-2">
+          <label class="text-xs font-bold text-gray-300 block mb-1">🔗 Enlace Comunidad VIP (WhatsApp)</label>
+          <input type="url" id="linkVipInput" class="form-input" placeholder="Ej: https://chat.whatsapp.com/..." />
+        </div>
 
         <div class="flex gap-2 mt-3">
           <button onclick="saveLandingContent()" style="flex:1;padding:12px;border:none;border-radius:12px;cursor:pointer;font-family:'Nunito',sans-serif;font-weight:900;font-size:14px;color:#fff;background:linear-gradient(135deg,#14B8A6,#0EA5E9);">💾 Guardar cambios</button>
@@ -634,6 +639,8 @@ async function loadLandingConfig() {
       }
       if (data.precio_boleto) document.getElementById('precioInput').value = data.precio_boleto;
       if (data.minimo_boletos) document.getElementById('minimoInput').value = data.minimo_boletos;
+      // 🔗 NUEVO: Leer link desde Supabase al abrir el panel
+      if (data.enlace_vip) document.getElementById('linkVipInput').value = data.enlace_vip;
     }
   } catch(e) {}
 }
@@ -653,6 +660,7 @@ async function saveLandingContent() {
   const mensaje = document.getElementById('landingMsgInput').value.trim();
   const precioVal = document.getElementById('precioInput').value;
   const minimoVal = document.getElementById('minimoInput').value;
+  const vipVal = document.getElementById('linkVipInput').value.trim(); // 🔗 NUEVO: Capturar el link
 
   let flyerUrl  = null;
   try {
@@ -667,6 +675,7 @@ async function saveLandingContent() {
     if (flyerUrl) payload.flyer_url = flyerUrl;
     if (precioVal) payload.precio_boleto = parseFloat(precioVal);
     if (minimoVal) payload.minimo_boletos = parseInt(minimoVal, 10);
+    if (vipVal) payload.enlace_vip = vipVal; // 🔗 NUEVO: Guardar en Supabase
 
     await db.from('landing_config').upsert([payload], { onConflict:'id' });
     showToast('✅ Guardado', 2500);

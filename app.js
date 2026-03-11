@@ -7,8 +7,8 @@ let PRECIO_BOLETO      = 5;
 let MINIMO_BOLETOS     = 20;     
 const TOTAL_BOLETOS      = 10000;  
 const BOLETOS_POR_PAGINA = 500;
-// NUEVO ENLACE DE LA COMUNIDAD VIP:
-const VIP_URL = 'https://chat.whatsapp.com/CT7Vkzgt81ZCrXsdbLLp3T?mode=gi_t';
+// 🔗 NUEVO: Ahora es un 'let' para que el Admin lo pueda cambiar
+let VIP_URL = 'https://chat.whatsapp.com/CT7Vkzgt81ZCrXsdbLLp3T?mode=gi_t';
 
 let ticketStates    = new Map();
 let availableList   = [];
@@ -56,6 +56,11 @@ document.addEventListener('DOMContentLoaded', async () => {
       if (configData.minimo_boletos) {
         MINIMO_BOLETOS = parseInt(configData.minimo_boletos, 10);
         cantidadAzar = MINIMO_BOLETOS; // Emparejamos la selección al azar
+      }
+      
+      // 🔗 NUEVO: ACTUALIZAMOS EL ENLACE VIP SEGÚN EL ADMIN
+      if (configData.enlace_vip) {
+        VIP_URL = configData.enlace_vip;
       }
     }
   } catch (e) {
