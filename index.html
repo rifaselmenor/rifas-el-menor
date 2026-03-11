@@ -532,8 +532,8 @@
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="config.js"></script>
-<script src="app.js"></script>
+<script src="config.js?v=2"></script>
+<script src="app.js?v=3"></script>
 
 <script>
   // =========================================================================
@@ -609,7 +609,7 @@
   }
 
   // =========================================================================
-  // CALCULO DE TOP 10 (AHORA SÍ INDESTRUCTIBLE)
+  // CALCULO DE TOP 10 (AHORA SÍ INDESTRUCTIBLE - MODO BACKEND)
   // =========================================================================
   
   async function abrirTopTenLive() {
@@ -619,28 +619,14 @@
      document.body.style.overflow = 'hidden';
      
      try {
-         const { data, error } = await db.from('pedidos').select('nombre, cedula, numeros').eq('estado', 'aprobado');
+         // 🚀 SÉNIOR: Llamamos a la función optimizada de Supabase para no saturar el celular
+         const { data, error } = await db.rpc('get_top_10_compradores');
          if(error) throw error;
          
-         let conteo = {};
-         (data || []).forEach(p => {
-             if(!conteo[p.cedula]) conteo[p.cedula] = { nombre: p.nombre, cantidad: 0 };
-             
-             // Lógica blindada para contar los números, sea Array o String
-             let cant = 0;
-             if (Array.isArray(p.numeros)) {
-                 cant = p.numeros.length;
-             } else if (typeof p.numeros === 'string') {
-                 cant = p.numeros.split(',').length;
-             }
-             
-             conteo[p.cedula].cantidad += cant;
-         });
-         
-         // Ordena del mayor al menor y agarra los 10 primeros
-         let top10 = Object.values(conteo).sort((a,b) => b.cantidad - a.cantidad).slice(0, 10);
-         renderTopTen(top10, '🏆 SORTEO ACTIVO');
+         // La base de datos ya nos entrega los 10 primeros listos
+         renderTopTen(data, '🏆 SORTEO ACTIVO');
      } catch(e) {
+         console.error("Error al cargar Top 10:", e);
          document.getElementById('topTenList').innerHTML = '<div class="text-center text-red-400 font-bold py-4">❌ Error de conexión al cargar datos</div>';
      }
   }
